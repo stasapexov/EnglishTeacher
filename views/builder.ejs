@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<h1>Builder</h1>
+
+<p>Rebuild the hidden word using these letters:</p>
+
+<p id="shuffled"></p>
+
+<input id="answer">
+<button onclick="check()">Check</button>
+
+<p id="result"></p>
+
+<div class="xp">
+    XP: <span id="xp">0</span>
+    Level: <span id="level">1</span>
+</div>
+
+<script>
+    const word = "<%= word %>";
+    const shuffled = word.split("").sort(() => Math.random() - 0.5).join("");
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("shuffled").innerText = shuffled;
+    });
+
+    function check() {
+        const ans = document.getElementById("answer").value.trim();
+        const result = document.getElementById("result");
+
+        if (ans.toLowerCase() === word.toLowerCase()) {
+            result.innerText = "Correct!";
+            addXP(15);
+        } else {
+            result.innerText = "Try again";
+        }
+    }
+</script>
+
+<script src="/xp.js"></script>
+</body>
+</html>
+

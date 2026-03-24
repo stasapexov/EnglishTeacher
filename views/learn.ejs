@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+
+<body>
+
+<h1>New Word</h1>
+
+<div class="card">
+
+    <div class="card-inner">
+
+        <div class="card-front">
+
+            <%= data.word %>
+
+        </div>
+
+        <div class="card-back">
+
+            <%= data.meanings[0].definitions[0].definition %>
+
+        </div>
+
+    </div>
+
+</div>
+
+<br>
+
+<a class="button" href="/learn">Next Word</a>
+<button onclick="speak()">🔊 Pronounce</button>
+
+<script>
+
+    function speak(){
+
+        let word = "<%= data.word %>"
+
+        let speech = new SpeechSynthesisUtterance(word)
+
+        speech.lang="en-US"
+
+        speechSynthesis.speak(speech)
+
+    }
+
+</script>
+</body>
+
+</html>

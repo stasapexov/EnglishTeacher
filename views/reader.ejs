@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+<h1>Reader</h1>
+
+<div class="reader-shell">
+    <div class="reader-topbar">
+        <a class="reader-home" href="/">← Menu</a>
+
+        <label class="reader-label">
+            Book:
+            <select id="bookSelect" class="reader-select">
+                <% books.forEach(b => { %>
+                    <option value="<%= b.id %>"><%= b.title %> — <%= b.author %></option>
+                <% }) %>
+            </select>
+        </label>
+
+        <div class="reader-status" id="readerStatus"></div>
+    </div>
+
+    <div class="reader-meta">
+        <div class="reader-title" id="bookTitle"></div>
+        <div class="reader-author" id="bookAuthor"></div>
+    </div>
+
+    <div class="reader-card">
+        <div id="readerText" class="reader-text" aria-label="Book text"></div>
+    </div>
+
+    <div id="translatePopup" class="translate-popup" role="dialog" aria-hidden="true">
+        <div class="translate-word" id="popupWord"></div>
+        <div class="translate-result" id="popupResult"></div>
+        <div class="translate-actions">
+            <button id="popupSpeak" class="translate-btn">Pronounce</button>
+            <button id="popupClose" class="translate-btn secondary">Close</button>
+        </div>
+    </div>
+</div>
+
+<script src="/reader.js"></script>
+</body>
+</html>
+
