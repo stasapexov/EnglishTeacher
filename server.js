@@ -310,20 +310,10 @@ app.post("/api/translate", async (req, res) => {
 
 // ===== LEARN =====
 
-app.get("/learn", async (req, res) => {
-    const word = words[Math.floor(Math.random() * words.length)]
-
-    try {
-        const dictionary = await axios.get(
-            `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`,
-            { timeout: 5000 }
-        )
-
-        res.render("learn", { data: dictionary.data[0] })
-    } catch {
-        res.render("learn", { data: { word, meanings: [{ definitions: [{ definition: "No definition" }] }] } })
-    }
+app.get("/learn", (req, res) => {
+    res.render("learn")
 })
+
 
 // ===== GUESS =====
 
