@@ -362,10 +362,18 @@ app.get("/wordle", (req, res) => {
 // ===== BUILDER =====
 
 app.get("/builder", (req, res) => {
-    const word = words[Math.floor(Math.random() * words.length)]
-    res.render("builder", { word })
+    const level = req.query.level || "A";
+    let currentArray
+    if(level === "A") {
+        currentArray = wordPairs
+    }else if (level === "B") {
+        currentArray = wordPairs2
+    }else{
+        currentArray = wordPairs3
+    }
+    const pair = currentArray[Math.floor(Math.random() * currentArray.length)]
+    res.render("builder", { word: pair.en })
 })
-
 // ===== START =====
 console.log("Server starting...")
 app.listen(3000, () => {
