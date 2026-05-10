@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Повторение слов</title><link rel="stylesheet" href="/style.css"></head>
+<body><div class="app-shell" id="reviewApp"><div class="app-topbar"><a class="app-home" href="/dictionary">← Словарь</a><h1>🔁 Интервальное повторение</h1><a class="app-home" href="/profile">Профиль</a></div><div id="reviewBox"></div></div>
+<script src="/account.js"></script><script>
+let words=[], index=0; const root=document.getElementById('reviewApp'); if(requireLogin(root)) loadReview()
+async function loadReview(){ const data=await apiJson('/api/review'); words=data.words; index=0; render() }
+function render(){ const box=document.getElementById('reviewBox'); if(!words.length){box.innerHTML='<section class="app-card empty-state"><h2>Нет слов для повторения</h2><p>Добавьте слова в словарь.</p></section>';return} const w=words[index]; box.innerHTML=`<section class="app-card empty-state"><span class="badge">${index+1}/${words.length}</span><h2>${w.word}</h2><p class="app-muted">Вспомните перевод, затем проверьте себя.</p><details><summary>Показать перевод</summary><h3>${w.translation||'—'}</h3></details><button class="app-btn" onclick="answer(true)">Я знал</button> <button class="app-btn danger" onclick="answer(false)">Ошибка</button></section>` }
+async function answer(correct){ await apiJson('/api/review/'+words[index].id,{method:'POST',body:JSON.stringify({correct})}); index++; if(index>=words.length) await loadReview(); else render() }
+</script></body></html>

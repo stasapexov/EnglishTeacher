@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль — English Trainer</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="app-shell" id="profileApp">
+    <div class="app-topbar">
+        <a class="app-home" href="/">← Главная</a>
+        <h1>👤 Личный прогресс</h1>
+        <a class="app-home" href="/dictionary">Мой словарь</a>
+    </div>
+    <div class="app-grid" id="stats"></div>
+    <div class="app-grid" style="margin-top:16px;">
+        <section class="app-card">
+            <h2>✅ Ежедневные задания</h2>
+            <div id="daily" class="app-list"></div>
+        </section>
+        <section class="app-card">
+            <h2>🏅 Достижения</h2>
+            <div id="achievements" class="app-list"></div>
+        </section>
+        <section class="app-card">
+            <h2>📚 Прогресс чтения</h2>
+            <div id="reading" class="app-list"></div>
+        </section>
+    </div>
+</div>
+<script src="/account.js"></script>
+<script>
+const root = document.getElementById('profileApp')
+if (requireLogin(root)) loadProfile()
+
+async function loadProfile() {
+    const data = await apiJson('/api/progress')
+    const user = data.user
+    const p = user.progress
+    document.getElementById('stats').innerHTML = `
+        <div class="app-card"><h3>Уровень</h3><div class="app-stat">${p.level}</div><p class="app-muted">Текущий уровень</p></div>
+        <div class="app-card"><h3>XP</h3><div class="app-stat">${p.xp}</div><p class="app-muted">Опыт до следующего уровня</p></div>
+        <div class="app-card"><h3>Серия</h3><div class="app-stat">${p.streak}</div><p class="app-muted">дней подряд</p></div>
+        <div class="app-card"><h3>Слова</h3><div class="app-stat">${p.learnedWords}</div><p class="app-muted">в личном словаре</p></div>
+        <div class="app-card"><h3>Уровень English</h3><div class="app-stat">${user.placementLevel}</div><p class="app-muted"><a href="/placement">Пройти тест</a></p></div>
+    `
+    document.getElementById('daily').innerHTML = data.dailyTasks.tasks.map(t => `
+        <div class="app-row"><span>${t.done ? '✅' : '⬜'} ${t.title}</span><strong>${t.progress}/${t.target} · +${t.xp} XP</strong></div>
+    `).join('')
+    document.getElementById('achievements').innerHTML = user.achievements.length ? user.achievements.map(a => `
+        <div class="app-row"><span>🏅 ${a.title}</span><span>${formatDate(a.earnedAt)}</span></div>
+    `).join('') : '<p class="app-muted">Пока нет достижений — начните тренировку.</p>'
+    const reading = Object.entries(p.reading || {})
+    document.getElementById('reading').innerHTML = reading.length ? reading.map(([book, item]) => `
+        <div class="app-row"><span>${book}</span><strong>${item.percent}%</strong></div>
+    `).join('') : '<p class="app-muted">Откройте Reading Room и начните читать.</p>'
+}
+</script>
+</body>
+</html>

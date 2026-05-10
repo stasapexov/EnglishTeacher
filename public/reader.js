@@ -9,11 +9,19 @@ const popupWord = document.getElementById("popupWord")
 const popupResult = document.getElementById("popupResult")
 const popupClose = document.getElementById("popupClose")
 const popupSpeak = document.getElementById("popupSpeak")
+const popupSave = document.getElementById("popupSave")
 
 const CACHE_KEY = "reader_translate_cache_v1"
 const cache = loadCache()
 
 let currentWord = ""
+let currentTranslation = ""
+let currentBookId = elSelect.value
+let progressTimer = null
+
+function getReaderToken() {
+    return localStorage.getItem("englishTrainer_token") || ""
+}
 
 function loadCache() {
     try {
@@ -74,10 +82,12 @@ async function loadBook(id) {
         return
     }
     const data = await r.json()
+    currentBookId = id
     elTitle.textContent = data.title
     elAuthor.textContent = data.author
     renderText(data.text)
     setStatus("Click a word to translate")
+    restoreScroll(id)
 }
 
 function positionPopupNear(target) {
@@ -91,6 +101,7 @@ function positionPopupNear(target) {
 
 function openPopup(word, target) {
     currentWord = word
+    currentTranslation = ""
     popupWord.textContent = word
     popupResult.textContent = "Translating…"
     popup.setAttribute("aria-hidden", "false")
@@ -145,6 +156,7 @@ elText.addEventListener("click", async (e) => {
         const t = await translate(word)
         // If user clicked another word while we were loading
         if (currentWord !== word) return
+        currentTranslation = t
         popupResult.textContent = t
     } catch (err) {
         if (currentWord !== word) return
@@ -157,9 +169,63 @@ popupSpeak.addEventListener("click", () => {
     if (currentWord) speak(currentWord)
 })
 
+popupSave.addEventListener("click", async () => {
+    if (!currentWord) return
+    const token = getReaderToken()
+    if (!token) {
+        popupResult.textContent = "Войдите в аккаунт, чтобы сохранять слова"
+        return
+    }
+
+    try {
+        const r = await fetch("/api/dictionary", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ word: currentWord, translation: currentTranslation })
+        })
+        if (!r.ok) throw new Error("save_failed")
+        popupResult.textContent = `${currentTranslation || currentWord} · сохранено в словарь`
+    } catch {
+        popupResult.textContent = "Не удалось сохранить слово"
+    }
+})
+
+function progressKey(bookId) {
+    return `reader_progress_${bookId}`
+}
+
+function restoreScroll(bookId) {
+    const saved = Number(localStorage.getItem(progressKey(bookId)) || 0)
+    if (saved > 0) setTimeout(() => window.scrollTo({ top: saved, behavior: "smooth" }), 100)
+}
+
+function saveReadingProgress() {
+    const scrollY = window.scrollY
+    localStorage.setItem(progressKey(currentBookId), String(scrollY))
+    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
+    const percent = Math.round(Math.min(100, (scrollY / maxScroll) * 100))
+    const token = getReaderToken()
+    if (!token) return
+    clearTimeout(progressTimer)
+    progressTimer = setTimeout(() => {
+        fetch("/api/reading-progress", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ bookId: currentBookId, percent, scrollY, xp: percent >= 10 ? 1 : 0 })
+        }).catch(() => {})
+    }, 700)
+}
+
 window.addEventListener("scroll", () => {
     // Keep popup stable enough; close to avoid weird positions
     if (popup.classList.contains("open")) closePopup()
+    saveReadingProgress()
 })
 
 document.addEventListener("keydown", (e) => {

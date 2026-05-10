@@ -78,6 +78,144 @@ function findUserByToken(users, token) {
     return users.find(user => user.tokenHash === tokenHash) || null
 }
 
+
+function todayKey(date = new Date()) {
+    return date.toISOString().slice(0, 10)
+}
+
+function previousDayKey(date = new Date()) {
+    const copy = new Date(date)
+    copy.setUTCDate(copy.getUTCDate() - 1)
+    return todayKey(copy)
+}
+
+function defaultProgress() {
+    return {
+        xp: 0,
+        level: 1,
+        streak: 0,
+        learnedWords: 0,
+        lastActivityDate: "",
+        modeStats: {
+            learn: { completed: 0, xp: 0 },
+            guess: { completed: 0, xp: 0 },
+            builder: { completed: 0, xp: 0 },
+            wordle: { completed: 0, xp: 0 },
+            reader: { completed: 0, xp: 0 },
+            review: { completed: 0, xp: 0 },
+            grammar: { completed: 0, xp: 0 },
+            pronunciation: { completed: 0, xp: 0 }
+        },
+        reading: {}
+    }
+}
+
+function defaultDailyTasks() {
+    return {
+        date: todayKey(),
+        tasks: [
+            { id: "review", title: "Повтори 10 слов", target: 10, progress: 0, done: false, xp: 20 },
+            { id: "reader", title: "Переведи 10 слов в Reading Room", target: 10, progress: 0, done: false, xp: 15 },
+            { id: "game", title: "Пройди 1 игру", target: 1, progress: 0, done: false, xp: 15 }
+        ]
+    }
+}
+
+function ensureUserLearningData(user) {
+    user.progress = { ...defaultProgress(), ...(user.progress || {}) }
+    user.progress.modeStats = { ...defaultProgress().modeStats, ...(user.progress.modeStats || {}) }
+    user.progress.reading = user.progress.reading || {}
+    user.dictionary = Array.isArray(user.dictionary) ? user.dictionary : []
+    user.achievements = Array.isArray(user.achievements) ? user.achievements : []
+    user.dailyTasks = user.dailyTasks || defaultDailyTasks()
+    if (user.dailyTasks.date !== todayKey()) user.dailyTasks = defaultDailyTasks()
+    return user
+}
+
+function xpForLevel(level) {
+    return 80 + (level - 1) * 55
+}
+
+function recalcLevel(progress) {
+    while (progress.level < 100 && progress.xp >= xpForLevel(progress.level)) {
+        progress.xp -= xpForLevel(progress.level)
+        progress.level++
+    }
+}
+
+function awardXp(user, mode, amount = 0) {
+    ensureUserLearningData(user)
+    const progress = user.progress
+    const safeMode = progress.modeStats[mode] ? mode : "learn"
+    progress.xp += Number(amount) || 0
+    progress.modeStats[safeMode].xp += Number(amount) || 0
+    progress.modeStats[safeMode].completed += 1
+
+    const today = todayKey()
+    if (progress.lastActivityDate !== today) {
+        progress.streak = progress.lastActivityDate === previousDayKey() ? progress.streak + 1 : 1
+        progress.lastActivityDate = today
+    }
+
+    recalcLevel(progress)
+    updateAchievements(user)
+}
+
+function updateDailyTask(user, taskId, amount = 1) {
+    ensureUserLearningData(user)
+    const task = user.dailyTasks.tasks.find(item => item.id === taskId)
+    if (!task || task.done) return null
+    task.progress = Math.min(task.target, task.progress + amount)
+    if (task.progress >= task.target) {
+        task.done = true
+        awardXp(user, "learn", task.xp)
+    }
+    return task
+}
+
+function updateAchievements(user) {
+    ensureUserLearningData(user)
+    const achievements = [
+        { id: "first-login", title: "Первый вход", condition: () => true },
+        { id: "ten-words", title: "10 слов в словаре", condition: () => user.dictionary.length >= 10 },
+        { id: "hundred-xp", title: "100 XP", condition: () => user.progress.xp >= 100 || user.progress.level > 1 },
+        { id: "week-streak", title: "7 дней подряд", condition: () => user.progress.streak >= 7 },
+        { id: "reader-start", title: "Первое чтение", condition: () => Object.keys(user.progress.reading || {}).length > 0 }
+    ]
+
+    for (const achievement of achievements) {
+        if (!user.achievements.some(item => item.id === achievement.id) && achievement.condition()) {
+            user.achievements.push({ id: achievement.id, title: achievement.title, earnedAt: new Date().toISOString() })
+        }
+    }
+}
+
+function authContext(req) {
+    const users = readUsers()
+    const user = findUserByToken(users, getBearerToken(req))
+    if (user) ensureUserLearningData(user)
+    return { users, user }
+}
+
+function requireApiAuth(req, res) {
+    const ctx = authContext(req)
+    if (!ctx.user) {
+        res.status(401).json({ error: "unauthorized", message: "Нужно войти в аккаунт" })
+        return null
+    }
+    return ctx
+}
+
+function publicLearningUser(user) {
+    ensureUserLearningData(user)
+    return {
+        ...publicUser(user),
+        progress: user.progress,
+        achievements: user.achievements,
+        placementLevel: user.placementLevel || "Не определён"
+    }
+}
+
 app.post("/api/register", (req, res) => {
     const name = String(req.body.name || "").trim()
     const email = normalizeEmail(req.body.email)
@@ -93,19 +231,19 @@ app.post("/api/register", (req, res) => {
     }
 
     const now = new Date().toISOString()
-    const user = {
+    const user = ensureUserLearningData({
         id: crypto.randomUUID(),
         name,
         email,
         passwordHash: createPasswordHash(password),
         createdAt: now,
         updatedAt: now
-    }
+    })
     const token = createSessionToken(user)
     users.push(user)
     saveUsers(users)
 
-    res.status(201).json({ message: "Регистрация успешна", token, user: publicUser(user) })
+    res.status(201).json({ message: "Регистрация успешна", token, user: publicLearningUser(user) })
 })
 
 app.post("/api/login", (req, res) => {
@@ -122,7 +260,7 @@ app.post("/api/login", (req, res) => {
     user.updatedAt = new Date().toISOString()
     saveUsers(users)
 
-    res.json({ message: "Вход выполнен", token, user: publicUser(user) })
+    res.json({ message: "Вход выполнен", token, user: publicLearningUser(user) })
 })
 
 app.get("/api/me", (req, res) => {
@@ -130,7 +268,7 @@ app.get("/api/me", (req, res) => {
     const user = findUserByToken(users, getBearerToken(req))
 
     if (!user) return res.status(401).json({ error: "unauthorized", message: "Нужно войти в аккаунт" })
-    res.json({ user: publicUser(user) })
+    res.json({ user: publicLearningUser(user) })
 })
 
 app.post("/api/logout", (req, res) => {
@@ -144,6 +282,180 @@ app.post("/api/logout", (req, res) => {
     }
 
     res.json({ message: "Вы вышли из аккаунта" })
+})
+
+
+// ===== LEARNING PROFILE API =====
+app.get("/api/progress", (req, res) => {
+    const ctx = requireApiAuth(req, res)
+    if (!ctx) return
+    updateAchievements(ctx.user)
+    saveUsers(ctx.users)
+    res.json({ user: publicLearningUser(ctx.user), dailyTasks: ctx.user.dailyTasks })
+})
+
+app.post("/api/activity", (req, res) => {
+    const ctx = requireApiAuth(req, res)
+    if (!ctx) return
+    const mode = String(req.body.mode || "learn")
+    const xp = Math.max(0, Math.min(100, Number(req.body.xp) || 0))
+    awardXp(ctx.user, mode, xp)
+    if (["wordle", "builder", "guess"].includes(mode)) updateDailyTask(ctx.user, "game", 1)
+    saveUsers(ctx.users)
+    res.json({ user: publicLearningUser(ctx.user), dailyTasks: ctx.user.dailyTasks })
+})
+
+app.get("/api/daily", (req, res) => {
+    const ctx = requireApiAuth(req, res)
+    if (!ctx) return
+    saveUsers(ctx.users)
+    res.json({ dailyTasks: ctx.user.dailyTasks })
+})
+
+app.post("/api/daily/:id", (req, res) => {
+    const ctx = requireApiAuth(req, res)
+    if (!ctx) return
+    const task = updateDailyTask(ctx.user, req.params.id, Number(req.body.amount) || 1)
+    saveUsers(ctx.users)
+    res.json({ task, dailyTasks: ctx.user.dailyTasks, user: publicLearningUser(ctx.user) })
+})
+
+app.get("/api/dictionary", (req, res) => {
+    const ctx = requireApiAuth(req, res)
+    if (!ctx) return
+    const status = req.query.status
+    const items = status ? ctx.user.dictionary.filter(item => item.status === status) : ctx.user.dictionary
+    res.json({ words: items })
+})
+
+app.post("/api/dictionary", (req, res) => {
+    const ctx = requireApiAuth(req, res)
+    if (!ctx) return
+    const word = String(req.body.word || "").trim()
+    const translation = String(req.body.translation || "").trim()
+    if (!word) return res.status(400).json({ error: "word_required", message: "Укажите слово" })
+
+    const existing = ctx.user.dictionary.find(item => item.word.toLowerCase() === word.toLowerCase())
+    if (existing) {
+        existing.translation = translation || existing.translation
+        existing.status = "new"
+        existing.updatedAt = new Date().toISOString()
+        saveUsers(ctx.users)
+        return res.json({ word: existing, words: ctx.user.dictionary })
+    }
+
+    const now = new Date().toISOString()
+    const item = {
+        id: crypto.randomUUID(),
+        word,
+        translation,
+        status: "new",
+        repetitions: 0,
+        correct: 0,
+        wrong: 0,
+        nextReviewAt: now,
+        createdAt: now,
+        updatedAt: now
+    }
+    ctx.user.dictionary.push(item)
+    ctx.user.progress.learnedWords = ctx.user.dictionary.length
+    updateDailyTask(ctx.user, "reader", 1)
+    updateAchievements(ctx.user)
+    saveUsers(ctx.users)
+    res.status(201).json({ word: item, words: ctx.user.dictionary, user: publicLearningUser(ctx.user) })
+})
+
+app.patch("/api/dictionary/:id", (req, res) => {
+    const ctx = requireApiAuth(req, res)
+    if (!ctx) return
+    const item = ctx.user.dictionary.find(word => word.id === req.params.id)
+    if (!item) return res.status(404).json({ error: "word_not_found", message: "Слово не найдено" })
+
+    if (req.body.translation !== undefined) item.translation = String(req.body.translation || "").trim()
+    if (["new", "review", "learned"].includes(req.body.status)) item.status = req.body.status
+    item.updatedAt = new Date().toISOString()
+    saveUsers(ctx.users)
+    res.json({ word: item, words: ctx.user.dictionary })
+})
+
+app.delete("/api/dictionary/:id", (req, res) => {
+    const ctx = requireApiAuth(req, res)
+    if (!ctx) return
+    ctx.user.dictionary = ctx.user.dictionary.filter(word => word.id !== req.params.id)
+    ctx.user.progress.learnedWords = ctx.user.dictionary.length
+    saveUsers(ctx.users)
+    res.json({ words: ctx.user.dictionary })
+})
+
+app.get("/api/review", (req, res) => {
+    const ctx = requireApiAuth(req, res)
+    if (!ctx) return
+    const now = Date.now()
+    const due = ctx.user.dictionary.filter(item => new Date(item.nextReviewAt).getTime() <= now && item.status !== "learned")
+    res.json({ words: due.length ? due : ctx.user.dictionary.filter(item => item.status !== "learned").slice(0, 10) })
+})
+
+app.post("/api/review/:id", (req, res) => {
+    const ctx = requireApiAuth(req, res)
+    if (!ctx) return
+    const item = ctx.user.dictionary.find(word => word.id === req.params.id)
+    if (!item) return res.status(404).json({ error: "word_not_found", message: "Слово не найдено" })
+
+    const correct = Boolean(req.body.correct)
+    const intervals = [1, 3, 7, 14, 30]
+    if (correct) {
+        item.correct += 1
+        item.repetitions += 1
+        item.status = item.repetitions >= 4 ? "learned" : "review"
+        awardXp(ctx.user, "review", 5)
+        updateDailyTask(ctx.user, "review", 1)
+    } else {
+        item.wrong += 1
+        item.repetitions = 0
+        item.status = "review"
+    }
+    const days = correct ? intervals[Math.min(item.repetitions, intervals.length - 1)] : 1
+    const next = new Date()
+    next.setUTCDate(next.getUTCDate() + days)
+    item.nextReviewAt = next.toISOString()
+    item.updatedAt = new Date().toISOString()
+    saveUsers(ctx.users)
+    res.json({ word: item, user: publicLearningUser(ctx.user), dailyTasks: ctx.user.dailyTasks })
+})
+
+app.post("/api/reading-progress", (req, res) => {
+    const ctx = requireApiAuth(req, res)
+    if (!ctx) return
+    const bookId = String(req.body.bookId || "").trim()
+    if (!bookId) return res.status(400).json({ error: "book_required" })
+    ctx.user.progress.reading[bookId] = {
+        percent: Math.max(0, Math.min(100, Number(req.body.percent) || 0)),
+        scrollY: Math.max(0, Number(req.body.scrollY) || 0),
+        updatedAt: new Date().toISOString()
+    }
+    awardXp(ctx.user, "reader", Number(req.body.xp) || 0)
+    saveUsers(ctx.users)
+    res.json({ reading: ctx.user.progress.reading[bookId], user: publicLearningUser(ctx.user) })
+})
+
+app.get("/api/leaderboard", (req, res) => {
+    const leaders = readUsers()
+        .map(ensureUserLearningData)
+        .map(user => ({ name: user.name, level: user.progress.level, xp: user.progress.xp, streak: user.progress.streak, learnedWords: user.dictionary.length }))
+        .sort((a, b) => (b.level - a.level) || (b.xp - a.xp) || (b.streak - a.streak))
+        .slice(0, 10)
+    res.json({ leaders })
+})
+
+app.post("/api/placement", (req, res) => {
+    const ctx = requireApiAuth(req, res)
+    if (!ctx) return
+    const answers = Array.isArray(req.body.answers) ? req.body.answers : []
+    const score = answers.filter(Boolean).length
+    ctx.user.placementLevel = score <= 4 ? "A1-A2" : score <= 8 ? "B1-B2" : "C1"
+    awardXp(ctx.user, "learn", 10)
+    saveUsers(ctx.users)
+    res.json({ level: ctx.user.placementLevel, score, user: publicLearningUser(ctx.user) })
 })
 
 // ===== WORDS =====
@@ -327,12 +639,47 @@ const BOOKS = [
         author: "Deniel Depho",
         file: path.join(__dirname, "public/books/sherlock.txt"),
     },
+    {
+        id: "dialogues",
+        title: "Everyday English Dialogues",
+        author: "English Trainer",
+        file: path.join(__dirname, "public/books/dialogues.txt"),
+    },
 ]
 
 // ===== ROUTES =====
 
 app.get("/", (req, res) => {
     res.render("index")
+})
+
+
+app.get("/profile", (req, res) => {
+    res.render("profile")
+})
+
+app.get("/dictionary", (req, res) => {
+    res.render("dictionary")
+})
+
+app.get("/review", (req, res) => {
+    res.render("review")
+})
+
+app.get("/placement", (req, res) => {
+    res.render("placement")
+})
+
+app.get("/grammar", (req, res) => {
+    res.render("grammar")
+})
+
+app.get("/pronunciation", (req, res) => {
+    res.render("pronunciation")
+})
+
+app.get("/leaderboard", (req, res) => {
+    res.render("leaderboard")
 })
 
 // ===== READER =====

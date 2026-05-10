@@ -608,6 +608,18 @@
             <span class="menu-icon">🔐</span>
             <span>Регистрация / Вход</span>
         </a>
+        <a href="/profile" class="menu-link">
+            <span class="menu-icon">👤</span>
+            <span>Профиль</span>
+        </a>
+        <a href="/dictionary" class="menu-link">
+            <span class="menu-icon">📘</span>
+            <span>Мой словарь</span>
+        </a>
+        <a href="/review" class="menu-link">
+            <span class="menu-icon">🔁</span>
+            <span>Повторение</span>
+        </a>
         <div class="divider"></div>
         <a href="#" class="menu-link" id="navGames">
             <span class="menu-icon">🎮</span>
@@ -689,17 +701,52 @@
             <div class="menu-icon">🔍</div>
             <div class="menu-title">Новое слово</div>
             <div class="menu-desc">Изучай и запоминай новые для себя слова</div>
+            <div class="menu-desc">A · B · C уровни доступны через ?level=A/B/C</div>
         </a>
         <a href="/builder" class="menu-item" data-color="builder">
             <div class="menu-icon">🏗️</div>
             <div class="menu-title">Конструктор</div>
             <div class="menu-desc">Строй сломанные слова</div>
+            <div class="menu-desc">Попробуй: <span>A</span> / <span>B</span> / <span>C</span></div>
         </a>
         <a href="/wordle" class="menu-item" data-color="wordle">
             <div class="menu-icon">🎯</div>
             <div class="menu-title">Wordle</div>
             <div class="menu-desc">Ежедневный вызов</div>
+            <div class="menu-desc">Выбирай сложность A, B или C</div>
         </a>
+    </div>
+
+    <div class="reading-section" style="margin-top: 1rem;">
+        <div class="reading-header">
+            <p>🎚️</p>
+            <h2>Выбор уровня сложности</h2>
+            <div class="feature-badge">A / B / C</div>
+        </div>
+        <div class="games-grid" style="margin-bottom:0;">
+            <a class="cta-button" href="/guess?level=A">Новое слово A</a>
+            <a class="cta-button" href="/guess?level=B">Новое слово B</a>
+            <a class="cta-button" href="/guess?level=C">Новое слово C</a>
+            <a class="cta-button" href="/builder?level=A">Конструктор A</a>
+            <a class="cta-button" href="/builder?level=B">Конструктор B</a>
+            <a class="cta-button" href="/builder?level=C">Конструктор C</a>
+            <a class="cta-button" href="/wordle?level=A">Wordle A</a>
+            <a class="cta-button" href="/wordle?level=B">Wordle B</a>
+            <a class="cta-button" href="/wordle?level=C">Wordle C</a>
+        </div>
+    </div>
+
+    <div class="section-title">
+        <span></span> 🚀 Личные инструменты
+    </div>
+    <div class="games-grid">
+        <a href="/profile" class="menu-item"><div class="menu-icon">👤</div><div class="menu-title">Профиль</div><div class="menu-desc">XP, streak, задания, достижения</div></a>
+        <a href="/dictionary" class="menu-item"><div class="menu-icon">📘</div><div class="menu-title">Мой словарь</div><div class="menu-desc">Сохраняй и фильтруй слова</div></a>
+        <a href="/review" class="menu-item"><div class="menu-icon">🔁</div><div class="menu-title">Повторение</div><div class="menu-desc">Интервальная система запоминания</div></a>
+        <a href="/placement" class="menu-item"><div class="menu-icon">🎯</div><div class="menu-title">Тест уровня</div><div class="menu-desc">A1–C1 и персональный старт</div></a>
+        <a href="/grammar" class="menu-item"><div class="menu-icon">🧩</div><div class="menu-title">Грамматика</div><div class="menu-desc">Правила + интерактивные ответы</div></a>
+        <a href="/pronunciation" class="menu-item"><div class="menu-icon">🎙️</div><div class="menu-title">Произношение</div><div class="menu-desc">Озвучка и запись речи</div></a>
+        <a href="/leaderboard" class="menu-item"><div class="menu-icon">🏆</div><div class="menu-title">Лидеры</div><div class="menu-desc">Рейтинг по уровню, XP и streak</div></a>
     </div>
 
     <!-- ОТДЕЛЬНОЕ ПРОСТРАНСТВО: READING ROOM (ЧТЕНИЕ КНИГ) -->

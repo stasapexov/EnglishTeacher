@@ -1,0 +1,10 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Тест уровня</title><link rel="stylesheet" href="/style.css"></head>
+<body><div class="app-shell" id="placementApp"><div class="app-topbar"><a class="app-home" href="/">← Главная</a><h1>🎯 Тест на уровень английского</h1><a class="app-home" href="/profile">Профиль</a></div><form class="app-card" id="quiz"></form><div id="result" class="app-card" hidden></div></div>
+<script src="/account.js"></script><script>
+const questions=[
+ ['I ___ a student.','am','is','are',0], ['She ___ coffee every morning.','drink','drinks','drinking',1], ['They went home ___ bus.','by','on','at',0], ['I have lived here ___ 2020.','for','since','during',1], ['If I had time, I ___ travel more.','will','would','am',1], ['This book was ___ by Orwell.','write','wrote','written',2], ['He is interested ___ science.','in','on','at',0], ['I wish I ___ more confident.','am','were','will be',1], ['Despite ___ tired, she continued.','be','being','been',1], ['The proposal was rejected, ___ surprised everyone.','which','that','who',0]
+]
+const root=document.getElementById('placementApp'); if(requireLogin(root)) renderQuiz()
+function renderQuiz(){quiz.innerHTML=questions.map((q,i)=>`<div class="app-row"><div><strong>${i+1}. ${q[0]}</strong>${q.slice(1,4).map((a,j)=>`<label class="quiz-option"><input type="radio" name="q${i}" value="${j}"> ${a}</label>`).join('')}</div></div>`).join('')+'<button class="app-btn" type="submit">Узнать уровень</button>'}
+quiz.addEventListener('submit',async e=>{e.preventDefault(); const answers=questions.map((q,i)=>Number(new FormData(quiz).get('q'+i))===q[4]); const data=await apiJson('/api/placement',{method:'POST',body:JSON.stringify({answers})}); result.hidden=false; result.innerHTML=`<h2>Ваш уровень: ${data.level}</h2><p>Правильных ответов: ${data.score}/${questions.length}</p><a class="app-btn" href="/profile">Открыть профиль</a>`})
+</script></body></html>
