@@ -2,6 +2,7 @@ const express = require("express")
 const axios = require("axios")
 const fs = require("fs")
 const path = require("path")
+const crypto = require("crypto")
 require("dotenv").config()
 
 const app = express()
@@ -9,6 +10,141 @@ const app = express()
 app.set("view engine", "ejs")
 app.use(express.static("public"))
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+
+// ===== AUTH (JSON STORAGE) =====
+const DATA_DIR = path.join(__dirname, "data")
+const USERS_FILE = path.join(DATA_DIR, "users.json")
+
+function ensureUsersFile() {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true })
+    if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, "[]\n")
+}
+
+function readUsers() {
+    ensureUsersFile()
+    const raw = fs.readFileSync(USERS_FILE, "utf8")
+    const users = JSON.parse(raw || "[]")
+    return Array.isArray(users) ? users : []
+}
+
+function saveUsers(users) {
+    ensureUsersFile()
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2) + "\n")
+}
+
+function normalizeEmail(email) {
+    return String(email || "").trim().toLowerCase()
+}
+
+function createPasswordHash(password, salt = crypto.randomBytes(16).toString("hex")) {
+    const hash = crypto.pbkdf2Sync(String(password), salt, 100000, 64, "sha512").toString("hex")
+    return `${salt}:${hash}`
+}
+
+function verifyPassword(password, storedHash = "") {
+    const [salt, hash] = storedHash.split(":")
+    if (!salt || !hash) return false
+    const candidate = createPasswordHash(password, salt).split(":")[1]
+    return crypto.timingSafeEqual(Buffer.from(hash, "hex"), Buffer.from(candidate, "hex"))
+}
+
+function publicUser(user) {
+    return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt
+    }
+}
+
+function createSessionToken(user) {
+    const token = crypto.randomBytes(32).toString("hex")
+    user.tokenHash = crypto.createHash("sha256").update(token).digest("hex")
+    user.lastLoginAt = new Date().toISOString()
+    return token
+}
+
+function getBearerToken(req) {
+    const header = req.get("authorization") || ""
+    if (header.toLowerCase().startsWith("bearer ")) return header.slice(7).trim()
+    return req.get("x-auth-token") || ""
+}
+
+function findUserByToken(users, token) {
+    if (!token) return null
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
+    return users.find(user => user.tokenHash === tokenHash) || null
+}
+
+app.post("/api/register", (req, res) => {
+    const name = String(req.body.name || "").trim()
+    const email = normalizeEmail(req.body.email)
+    const password = String(req.body.password || "")
+
+    if (name.length < 2) return res.status(400).json({ error: "name_required", message: "Введите имя минимум из 2 символов" })
+    if (!/^\S+@\S+\.\S+$/.test(email)) return res.status(400).json({ error: "email_invalid", message: "Введите корректный email" })
+    if (password.length < 6) return res.status(400).json({ error: "password_short", message: "Пароль должен быть не короче 6 символов" })
+
+    const users = readUsers()
+    if (users.some(user => user.email === email)) {
+        return res.status(409).json({ error: "email_exists", message: "Пользователь с таким email уже зарегистрирован" })
+    }
+
+    const now = new Date().toISOString()
+    const user = {
+        id: crypto.randomUUID(),
+        name,
+        email,
+        passwordHash: createPasswordHash(password),
+        createdAt: now,
+        updatedAt: now
+    }
+    const token = createSessionToken(user)
+    users.push(user)
+    saveUsers(users)
+
+    res.status(201).json({ message: "Регистрация успешна", token, user: publicUser(user) })
+})
+
+app.post("/api/login", (req, res) => {
+    const email = normalizeEmail(req.body.email)
+    const password = String(req.body.password || "")
+    const users = readUsers()
+    const user = users.find(item => item.email === email)
+
+    if (!user || !verifyPassword(password, user.passwordHash)) {
+        return res.status(401).json({ error: "invalid_credentials", message: "Неверный email или пароль" })
+    }
+
+    const token = createSessionToken(user)
+    user.updatedAt = new Date().toISOString()
+    saveUsers(users)
+
+    res.json({ message: "Вход выполнен", token, user: publicUser(user) })
+})
+
+app.get("/api/me", (req, res) => {
+    const users = readUsers()
+    const user = findUserByToken(users, getBearerToken(req))
+
+    if (!user) return res.status(401).json({ error: "unauthorized", message: "Нужно войти в аккаунт" })
+    res.json({ user: publicUser(user) })
+})
+
+app.post("/api/logout", (req, res) => {
+    const users = readUsers()
+    const user = findUserByToken(users, getBearerToken(req))
+
+    if (user) {
+        delete user.tokenHash
+        user.updatedAt = new Date().toISOString()
+        saveUsers(users)
+    }
+
+    res.json({ message: "Вы вышли из аккаунта" })
+})
 
 // ===== WORDS =====
 const words = require("./public/words.json")
