@@ -11,36 +11,59 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-1: #eef4ff;
+            --bg-2: #f8fbff;
+            --ink: #172033;
+            --muted: #64748b;
+            --primary: #4f46e5;
+            --primary-2: #8b5cf6;
+            --accent: #14b8a6;
+            --warm: #f59e0b;
+            --card: rgba(255, 255, 255, 0.82);
+            --line: rgba(148, 163, 184, 0.22);
+            --shadow: 0 28px 70px -34px rgba(30, 41, 59, 0.6);
+        }
+
         body {
-            background: linear-gradient(145deg, #f0f4ff 0%, #e9eefa 100%);
+            background:
+                radial-gradient(circle at 8% 10%, rgba(79, 70, 229, 0.18), transparent 28rem),
+                radial-gradient(circle at 94% 18%, rgba(20, 184, 166, 0.16), transparent 24rem),
+                radial-gradient(circle at 78% 88%, rgba(245, 158, 11, 0.14), transparent 24rem),
+                linear-gradient(145deg, var(--bg-1) 0%, var(--bg-2) 100%);
+            color: var(--ink);
             font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, -apple-system, 'Roboto', sans-serif;
             min-height: 100vh;
             padding: 2rem 1.5rem;
             position: relative;
+            overflow-x: hidden;
         }
 
         /* декоративные фоновые элементы */
         body::before {
             content: "";
-            position: absolute;
-            top: -20%;
-            left: -10%;
-            width: 280px;
-            height: 280px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0) 70%);
-            border-radius: 50%;
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(79, 70, 229, 0.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(79, 70, 229, 0.045) 1px, transparent 1px);
+            background-size: 52px 52px;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,0.75), transparent 76%);
+            pointer-events: none;
             z-index: 0;
         }
 
         body::after {
             content: "";
-            position: absolute;
-            bottom: -15%;
-            right: -5%;
-            width: 340px;
-            height: 340px;
-            background: radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0) 70%);
+            position: fixed;
+            right: -90px;
+            top: 80px;
+            width: 260px;
+            height: 260px;
+            background: conic-gradient(from 160deg, rgba(79, 70, 229, 0.15), rgba(20, 184, 166, 0.12), rgba(245, 158, 11, 0.12), rgba(79, 70, 229, 0.15));
             border-radius: 50%;
+            filter: blur(2px);
+            pointer-events: none;
             z-index: 0;
         }
 
@@ -49,10 +72,10 @@
             position: fixed;
             top: 25px;
             left: 25px;
-            width: 50px;
-            height: 50px;
-            background: white;
-            border-radius: 16px;
+            width: 54px;
+            height: 54px;
+            background: rgba(255, 255, 255, 0.86);
+            border-radius: 18px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -60,14 +83,15 @@
             gap: 6px;
             cursor: pointer;
             z-index: 1001;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 16px 34px rgba(79, 70, 229, 0.15);
             transition: all 0.3s ease;
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(14px);
         }
 
         .burger-btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 12px 24px rgba(79, 70, 229, 0.2);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 20px 38px rgba(79, 70, 229, 0.22);
         }
 
         .burger-btn span {
@@ -86,8 +110,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(3px);
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(5px);
             z-index: 1000;
             opacity: 0;
             visibility: hidden;
@@ -106,30 +130,28 @@
             left: -320px;
             width: 300px;
             height: 100%;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(24px);
+            box-shadow: 24px 0 54px rgba(15, 23, 42, 0.14);
             z-index: 1002;
             transition: left 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             padding: 1.8rem 0;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid rgba(99, 102, 241, 0.2);
+            border-right: 1px solid rgba(99, 102, 241, 0.18);
         }
 
-        .side-menu.open {
-            left: 0;
-        }
+        .side-menu.open { left: 0; }
 
         .menu-header {
             padding: 0 1.5rem 1.2rem;
-            border-bottom: 2px solid #e2e8f0;
+            border-bottom: 1px solid var(--line);
             margin-bottom: 1rem;
         }
 
         .menu-header h3 {
             font-size: 1.4rem;
-            background: linear-gradient(135deg, #4F46E5, #8B5CF6);
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
@@ -148,14 +170,14 @@
             padding: 14px 24px;
             text-decoration: none;
             color: #1e293b;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.2s;
             border-left: 3px solid transparent;
         }
 
         .menu-link:hover {
-            background: #f1f5f9;
-            border-left-color: #4F46E5;
+            background: rgba(79, 70, 229, 0.08);
+            border-left-color: var(--primary);
             padding-left: 28px;
         }
 
@@ -167,82 +189,151 @@
 
         .divider {
             height: 1px;
-            background: #e2e8f0;
+            background: var(--line);
             margin: 12px 20px;
         }
 
         .menu-footer {
             padding-top: 1rem;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid var(--line);
             margin-top: auto;
         }
 
         /* главная карточка */
         .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border-radius: 3.5rem;
-            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25);
+            background: linear-gradient(160deg, rgba(255,255,255,0.9), rgba(255,255,255,0.72));
+            backdrop-filter: blur(18px);
+            border-radius: 2.6rem;
+            box-shadow: var(--shadow);
             padding: 2rem 2rem 2.5rem;
             width: 100%;
-            max-width: 1300px;
+            max-width: 1220px;
             margin: 0 auto;
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.72);
             z-index: 2;
             position: relative;
         }
 
         /* шапка */
         .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 1.5rem;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1.2rem;
+            border: 1px solid var(--line);
+            border-radius: 2rem;
+            background:
+                linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(20, 184, 166, 0.08)),
+                rgba(255,255,255,0.6);
+        }
+
+        .hero-copy {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 2.5rem;
-            border-bottom: 2px solid rgba(99, 102, 241, 0.2);
-            padding-bottom: 1rem;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+
+        .eyebrow {
+            width: fit-content;
+            background: rgba(79, 70, 229, 0.1);
+            color: #4338ca;
+            border: 1px solid rgba(79, 70, 229, 0.14);
+            border-radius: 999px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
         }
 
         h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #1E2A5E, #4F46E5);
+            font-size: clamp(2.1rem, 5vw, 4.5rem);
+            line-height: 0.96;
+            font-weight: 900;
+            letter-spacing: -0.06em;
+            background: linear-gradient(135deg, #0f172a 0%, #4F46E5 55%, #14b8a6 100%);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
         }
 
-        .xp-panel {
-            background: #1e293b;
-            padding: 0.6rem 1.4rem;
-            border-radius: 60px;
+        .hero-subtitle {
+            max-width: 680px;
+            color: var(--muted);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .hero-actions {
             display: flex;
-            gap: 1.5rem;
-            font-weight: 600;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-top: 0.35rem;
         }
 
-        .xp-panel span:first-child, .xp-panel span:last-child {
-            color: #cbd5e1;
-            font-size: 0.9rem;
-        }
-
-        .xp-panel span:nth-child(2), .xp-panel span:nth-child(4) {
-            color: #facc15;
-            font-size: 1.2rem;
+        .hero-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            min-height: 44px;
+            padding: 0.75rem 1rem;
+            border-radius: 999px;
+            text-decoration: none;
             font-weight: 800;
-            background: #0f172a;
-            padding: 0 0.4rem;
-            border-radius: 28px;
-            min-width: 48px;
+            transition: 0.2s ease;
+        }
+
+        .hero-btn.primary {
+            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            box-shadow: 0 18px 28px -18px rgba(79, 70, 229, 0.8);
+        }
+
+        .hero-btn.secondary {
+            color: #334155;
+            background: rgba(255,255,255,0.78);
+            border: 1px solid var(--line);
+        }
+
+        .hero-btn:hover { transform: translateY(-2px); }
+
+        .xp-panel {
+            background: rgba(15, 23, 42, 0.96);
+            padding: 0.8rem;
+            border-radius: 1.4rem;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(92px, 1fr));
+            gap: 0.65rem;
+            font-weight: 700;
+            box-shadow: 0 20px 34px -24px rgba(15, 23, 42, 0.8);
+        }
+
+        .xp-panel span:nth-child(odd) {
+            color: #cbd5e1;
+            font-size: 0.78rem;
+            align-self: end;
+        }
+
+        .xp-panel span:nth-child(even) {
+            color: #fde68a;
+            font-size: 1.35rem;
+            font-weight: 900;
+            background: #020617;
+            padding: 0.25rem 0.55rem;
+            border-radius: 999px;
+            min-width: 54px;
             display: inline-block;
             text-align: center;
         }
 
         /* секция игр */
         .section-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin: 1.8rem 0 1.2rem;
+            font-size: 1.55rem;
+            font-weight: 850;
+            margin: 2rem 0 1.2rem;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -250,68 +341,122 @@
         }
 
         .section-title span {
-            background: #4F46E5;
-            width: 40px;
-            height: 4px;
-            border-radius: 4px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            width: 42px;
+            height: 5px;
+            border-radius: 999px;
         }
 
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-            gap: 1.8rem;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.1rem;
             margin-bottom: 1rem;
         }
 
         /* карточки игр и чтения */
         .menu-item {
-            background: white;
-            border-radius: 2rem;
-            padding: 1.6rem 0.8rem 1.3rem;
-            text-align: center;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,252,0.9));
+            border-radius: 1.8rem;
+            padding: 1.35rem;
+            min-height: 190px;
+            text-align: left;
             text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            box-shadow: 0 12px 22px -10px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.7);
+            transition: all 0.28s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 14px 32px -24px rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.18);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 0.6rem;
+            align-items: flex-start;
+            gap: 0.65rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-item::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 90% 12%, rgba(79, 70, 229, 0.14), transparent 9rem);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .menu-item::after {
+            content: "→";
+            position: absolute;
+            right: 1.1rem;
+            bottom: 1rem;
+            color: rgba(79, 70, 229, 0.7);
+            font-size: 1.5rem;
+            font-weight: 900;
+            transform: translateX(-6px);
+            opacity: 0;
+            transition: 0.25s ease;
         }
 
         .menu-item:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 28px 34px -16px rgba(79, 70, 229, 0.25);
-            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-7px);
+            box-shadow: 0 30px 44px -26px rgba(79, 70, 229, 0.45);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .menu-item:hover::before,
+        .menu-item:hover::after {
+            opacity: 1;
+            transform: translateX(0);
         }
 
         .menu-icon {
-            font-size: 3rem;
-            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+            width: 58px;
+            height: 58px;
+            display: grid;
+            place-items: center;
+            border-radius: 20px;
+            font-size: 2.15rem;
+            background: linear-gradient(135deg, rgba(79,70,229,0.12), rgba(20,184,166,0.1));
+            filter: drop-shadow(0 8px 10px rgba(15, 23, 42, 0.08));
         }
 
         .menu-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(145deg, #1f2937, #4b5563);
-            background-clip: text;
-            -webkit-background-clip: text;
-            color: transparent;
+            font-size: 1.25rem;
+            font-weight: 850;
+            color: #172033;
         }
 
         .menu-desc {
-            font-size: 0.8rem;
-            color: #6c757d;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            color: var(--muted);
+        }
+
+        .menu-chip {
+            margin-top: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            width: fit-content;
+            color: #4338ca;
+            background: rgba(79, 70, 229, 0.09);
+            border: 1px solid rgba(79, 70, 229, 0.12);
+            border-radius: 999px;
+            padding: 0.32rem 0.65rem;
+            font-size: 0.78rem;
+            font-weight: 800;
         }
 
         /* Секция Reading Room (отдельное пространство) */
         .reading-section {
             margin-top: 3rem;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(99, 102, 241, 0.05));
+            background:
+                linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(20, 184, 166, 0.06)),
+                rgba(255, 255, 255, 0.62);
             border-radius: 2rem;
             padding: 1.5rem 1.8rem;
-            border: 1px solid rgba(139, 92, 246, 0.3);
+            border: 1px solid rgba(139, 92, 246, 0.22);
             transition: all 0.3s;
+            box-shadow: 0 18px 38px -34px rgba(76, 29, 149, 0.6);
         }
 
         .reading-header {
@@ -323,36 +468,37 @@
 
         .reading-header h2 {
             font-size: 1.7rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+            font-weight: 850;
+            background: linear-gradient(135deg, #6D28D9, #14b8a6);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
         }
 
         .feature-badge {
-            background: #8B5CF6;
-            color: white;
-            font-size: 0.7rem;
-            padding: 4px 12px;
+            background: rgba(109, 40, 217, 0.1);
+            color: #6D28D9;
+            border: 1px solid rgba(109, 40, 217, 0.14);
+            font-size: 0.72rem;
+            padding: 5px 12px;
             border-radius: 30px;
-            font-weight: 500;
+            font-weight: 800;
         }
 
         .reading-card {
             display: flex;
             flex-wrap: wrap;
-            gap: 1.8rem;
+            gap: 1.4rem;
             align-items: stretch;
         }
 
         .reading-info {
             flex: 2;
-            min-width: 200px;
+            min-width: 240px;
             background: white;
             border-radius: 1.5rem;
             padding: 1.5rem;
-            box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+            box-shadow: 0 16px 28px -22px rgba(15, 23, 42, 0.45);
         }
 
         .reading-info p {
@@ -373,26 +519,24 @@
             gap: 10px;
         }
 
-        .feature-list li::before {
-            content: "✨";
-        }
+        .feature-list li::before { content: "✨"; }
 
         .cta-button {
             display: inline-block;
-            background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+            background: linear-gradient(135deg, var(--primary-2), #6D28D9);
             color: white;
             padding: 12px 28px;
             border-radius: 40px;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 800;
             margin-top: 12px;
             transition: 0.2s;
-            box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 12px 22px -14px rgba(139, 92, 246, 0.85);
         }
 
         .cta-button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 16px 26px -16px rgba(139, 92, 246, 0.95);
         }
 
         .book-preview {
@@ -402,6 +546,7 @@
             padding: 1.2rem;
             text-align: center;
             border: 1px solid #e2e8f0;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
         }
 
         .book-cover {
@@ -410,7 +555,7 @@
         }
 
         .book-title {
-            font-weight: 700;
+            font-weight: 800;
             margin: 8px 0;
         }
 
@@ -427,33 +572,35 @@
         .inspire-message {
             margin-top: 2.5rem;
             text-align: center;
-            font-size: 0.85rem;
-            background: rgba(255,255,240,0.7);
-            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            background: rgba(255,255,255,0.76);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            padding: 0.75rem 1.1rem;
             border-radius: 60px;
             width: fit-content;
             margin-left: auto;
             margin-right: auto;
             color: #334155;
+            box-shadow: 0 12px 24px -22px rgba(15,23,42,0.45);
         }
 
 
         /* регистрация и вход */
         .auth-card {
             margin-bottom: 2rem;
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(16, 185, 129, 0.08));
-            border: 1px solid rgba(79, 70, 229, 0.18);
+            background:
+                linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(20, 184, 166, 0.09)),
+                rgba(255,255,255,0.7);
+            border: 1px solid rgba(79, 70, 229, 0.14);
             border-radius: 2rem;
-            padding: 1.4rem;
+            padding: 1.35rem;
             display: grid;
             grid-template-columns: 1.2fr 1fr;
             gap: 1.2rem;
             align-items: center;
         }
 
-        .auth-copy {
-            text-align: left;
-        }
+        .auth-copy { text-align: left; }
 
         .auth-copy h2 {
             color: #1e293b;
@@ -467,10 +614,10 @@
         }
 
         .auth-form {
-            background: white;
+            background: rgba(255,255,255,0.95);
             border-radius: 1.5rem;
             padding: 1rem;
-            box-shadow: 0 12px 22px -14px rgba(15, 23, 42, 0.35);
+            box-shadow: 0 14px 26px -20px rgba(15, 23, 42, 0.45);
         }
 
         .auth-tabs {
@@ -486,7 +633,7 @@
             border: 0;
             border-radius: 999px;
             cursor: pointer;
-            font-weight: 700;
+            font-weight: 800;
             transition: 0.2s;
         }
 
@@ -525,9 +672,7 @@
         }
 
         .auth-submit:hover,
-        .logout-btn:hover {
-            transform: translateY(-1px);
-        }
+        .logout-btn:hover { transform: translateY(-1px); }
 
         .auth-status {
             min-height: 1.4rem;
@@ -536,13 +681,8 @@
             font-size: 0.9rem;
         }
 
-        .auth-status.success {
-            color: #059669;
-        }
-
-        .auth-status.error {
-            color: #dc2626;
-        }
+        .auth-status.success { color: #059669; }
+        .auth-status.error { color: #dc2626; }
 
         .user-card {
             background: white;
@@ -570,13 +710,19 @@
             padding: 0.7rem 1rem;
         }
 
-        @media (max-width: 680px) {
-            body { padding: 1rem; }
-            .glass-card { padding: 1.2rem; }
-            h1 { font-size: 1.8rem; }
-            .hero { flex-direction: column; gap: 1rem; }
-            .section-title { font-size: 1.5rem; }
-            .reading-section { padding: 1rem; }
+        @media (max-width: 780px) {
+            body { padding: 0.85rem; }
+            .burger-btn { top: 14px; left: 14px; width: 48px; height: 48px; }
+            .glass-card { padding: 1rem; border-radius: 1.6rem; }
+            .hero { grid-template-columns: 1fr; padding: 1rem; border-radius: 1.5rem; margin-top: 3.6rem; }
+            h1 { font-size: 2.25rem; letter-spacing: -0.04em; }
+            .hero-subtitle { font-size: 0.98rem; }
+            .xp-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .section-title { font-size: 1.35rem; }
+            .games-grid { grid-template-columns: 1fr; }
+            .menu-item { min-height: auto; }
+            .reading-section { padding: 1rem; border-radius: 1.5rem; }
+            .reading-header { align-items: flex-start; flex-wrap: wrap; }
             .auth-card { grid-template-columns: 1fr; }
         }
     </style>
@@ -649,7 +795,15 @@
 
 <div class="glass-card">
     <div class="hero">
-        <h1>English Trainer</h1>
+        <div class="hero-copy">
+            <div class="eyebrow">Учись играя</div>
+            <h1>English Trainer</h1>
+            <p class="hero-subtitle">Тренируй слова, грамматику, чтение и произношение в одном уютном пространстве — без лишних настроек на старте.</p>
+            <div class="hero-actions">
+                <a class="hero-btn primary" href="/learn">🚀 Начать урок</a>
+                <a class="hero-btn secondary" href="/placement">🎯 Пройти тест уровня</a>
+            </div>
+        </div>
         <div class="xp-panel">
             <span>🏆 XP</span>
             <span id="xp">0</span>
@@ -700,41 +854,24 @@
         <a href="/guess" class="menu-item" data-color="guess">
             <div class="menu-icon">🔍</div>
             <div class="menu-title">Новое слово</div>
-            <div class="menu-desc">Изучай и запоминай новые для себя слова</div>
-            <div class="menu-desc">A · B · C уровни доступны через ?level=A/B/C</div>
+            <div class="menu-desc">Изучай и запоминай новые для себя слова в быстром формате.</div>
+            <div class="menu-chip">⚡ Быстрый старт</div>
         </a>
         <a href="/builder" class="menu-item" data-color="builder">
             <div class="menu-icon">🏗️</div>
             <div class="menu-title">Конструктор</div>
-            <div class="menu-desc">Строй сломанные слова</div>
-            <div class="menu-desc">Попробуй: <span>A</span> / <span>B</span> / <span>C</span></div>
+            <div class="menu-desc">Собирай слова по частям и закрепляй правописание.</div>
+            <div class="menu-chip">🧠 Фокус на память</div>
         </a>
         <a href="/wordle" class="menu-item" data-color="wordle">
             <div class="menu-icon">🎯</div>
             <div class="menu-title">Wordle</div>
-            <div class="menu-desc">Ежедневный вызов</div>
-            <div class="menu-desc">Выбирай сложность A, B или C</div>
+            <div class="menu-desc">Ежедневный вызов для словарного запаса.</div>
+            <div class="menu-chip">🔥 Каждый день</div>
         </a>
     </div>
 
-    <div class="reading-section" style="margin-top: 1rem;">
-        <div class="reading-header">
-            <p>🎚️</p>
-            <h2>Выбор уровня сложности</h2>
-            <div class="feature-badge">A / B / C</div>
-        </div>
-        <div class="games-grid" style="margin-bottom:0;">
-            <a class="cta-button" href="/guess?level=A">Новое слово A</a>
-            <a class="cta-button" href="/guess?level=B">Новое слово B</a>
-            <a class="cta-button" href="/guess?level=C">Новое слово C</a>
-            <a class="cta-button" href="/builder?level=A">Конструктор A</a>
-            <a class="cta-button" href="/builder?level=B">Конструктор B</a>
-            <a class="cta-button" href="/builder?level=C">Конструктор C</a>
-            <a class="cta-button" href="/wordle?level=A">Wordle A</a>
-            <a class="cta-button" href="/wordle?level=B">Wordle B</a>
-            <a class="cta-button" href="/wordle?level=C">Wordle C</a>
-        </div>
-    </div>
+
 
     <div class="section-title">
         <span></span> 🚀 Личные инструменты
@@ -1026,7 +1163,7 @@
         if(navHome) navHome.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); window.scrollTo({top: 0, behavior: 'smooth'}); });
         if(navAuth) navAuth.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); document.getElementById('authSection').scrollIntoView({behavior: 'smooth', block: 'center'}); });
         if(navGames) navGames.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); document.querySelector('.games-grid').scrollIntoView({behavior: 'smooth', block: 'start'}); });
-        if(navReading) navReading.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); document.querySelector('.reading-section').scrollIntoView({behavior: 'smooth', block: 'start'}); });
+        if(navReading) navReading.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); document.querySelector('.reading-section:not([style])').scrollIntoView({behavior: 'smooth', block: 'start'}); });
         if(navAbout) navAbout.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); alert('ℹ️ English Trainer — интерактивная платформа для изучения английского через игры и чтение. Создано для эффективного обучения.'); });
         if(navCourses) navCourses.addEventListener('click', (e) => { e.preventDefault(); closeMenu(); alert('🎓 Расширенные курсы: индивидуальный план, уроки с носителем, доступ к библиотеке. Скоро запуск!'); });
 
