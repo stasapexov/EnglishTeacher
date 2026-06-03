@@ -12,6 +12,25 @@ app.use(express.static("public"))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+function parsePort(value, fallback = 3000) {
+    const port = Number(value)
+    return Number.isInteger(port) && port > 0 ? port : fallback
+}
+
+function healthPayload() {
+    return {
+        status: "ok",
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString()
+    }
+}
+
+// Health checks are intentionally registered before the other routes so cloud
+// platforms can verify the container without rendering a full page.
+app.get(["/health", "/healthz", "/ready"], (req, res) => {
+    res.status(200).json(healthPayload())
+})
+
 
 // ===== AUTH (JSON STORAGE) =====
 const DATA_DIR = path.join(__dirname, "data")
@@ -859,8 +878,14 @@ app.get("/builder", (req, res) => {
 })
 // ===== START =====
 console.log("Server starting...")
-const PORT = process.env.PORT || 3000;
+const PORT = parsePort(process.env.PORT)
+const HOST = process.env.HOST || "0.0.0.0"
 
-app.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Server running on port ${PORT}`)
+const server = app.listen(PORT, HOST, () => {
+    console.log(`🚀 Server running at http://${HOST}:${PORT}`)
+})
+
+server.on("error", error => {
+    console.error("Server failed to start:", error.message)
+    process.exit(1)
 })
