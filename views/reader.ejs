@@ -6,33 +6,73 @@
     <link rel="stylesheet" href="/style.css">
 </head>
 
-<body>
-<h1>Reader</h1>
+<body class="reader-page">
+<div class="reader-hero">
+    <a class="reader-home" href="/">← Menu</a>
+    <div>
+        <p class="reader-kicker">Reading room</p>
+        <h1>Выбери книгу под свой уровень английского</h1>
+        <p class="reader-subtitle">Открой книгу, кликай по словам для перевода и сохраняй новые слова в словарь.</p>
+    </div>
+</div>
 
 <div class="reader-shell">
-    <div class="reader-topbar">
-        <a class="reader-home" href="/">← Menu</a>
+    <section class="reader-library" aria-label="Book library">
+        <div class="reader-controls">
+            <label class="reader-label">
+                Уровень:
+                <select id="levelSelect" class="reader-select">
+                    <option value="all">Все уровни</option>
+                    <% [...new Set(books.map(b => b.level))].forEach(level => { %>
+                        <option value="<%= level %>"><%= level %></option>
+                    <% }) %>
+                </select>
+            </label>
 
-        <label class="reader-label">
-            Book:
-            <select id="bookSelect" class="reader-select">
-                <% books.forEach(b => { %>
-                    <option value="<%= b.id %>"><%= b.title %> — <%= b.author %></option>
-                <% }) %>
-            </select>
-        </label>
+            <label class="reader-label reader-book-select">
+                Книга:
+                <select id="bookSelect" class="reader-select">
+                    <% books.forEach(b => { %>
+                        <option value="<%= b.id %>" data-level="<%= b.level %>"><%= b.title %> — <%= b.author %></option>
+                    <% }) %>
+                </select>
+            </label>
 
-        <div class="reader-status" id="readerStatus"></div>
-    </div>
+            <div class="reader-status" id="readerStatus"></div>
+        </div>
 
-    <div class="reader-meta">
-        <div class="reader-title" id="bookTitle"></div>
-        <div class="reader-author" id="bookAuthor"></div>
-    </div>
+        <div class="book-grid" id="bookGrid">
+            <% books.forEach((b, index) => { %>
+                <button class="book-tile <%= index === 0 ? 'active' : '' %>" type="button" data-book-id="<%= b.id %>" data-level="<%= b.level %>">
+                    <span class="book-cover <%= b.coverTone %>" aria-hidden="true">
+                        <span class="book-cover-level"><%= b.level %></span>
+                        <span class="book-cover-title"><%= b.title %></span>
+                        <span class="book-cover-author"><%= b.author %></span>
+                    </span>
+                    <span class="book-info">
+                        <span class="book-level"><%= b.level %> · <%= b.levelLabel %></span>
+                        <span class="book-name"><%= b.title %></span>
+                        <span class="book-description"><%= b.description %></span>
+                        <span class="book-pages"><%= b.pages %></span>
+                    </span>
+                </button>
+            <% }) %>
+        </div>
+    </section>
 
-    <div class="reader-card">
-        <div id="readerText" class="reader-text" aria-label="Book text"></div>
-    </div>
+    <section class="reader-panel" aria-label="Reader text">
+        <div class="reader-meta">
+            <div>
+                <div class="reader-title" id="bookTitle"></div>
+                <div class="reader-author" id="bookAuthor"></div>
+            </div>
+            <span class="reader-level-badge" id="bookLevel"></span>
+        </div>
+
+        <div class="reader-card">
+            <div id="readerText" class="reader-text" aria-label="Book text"></div>
+        </div>
+    </section>
 
     <div id="translatePopup" class="translate-popup" role="dialog" aria-hidden="true">
         <div class="translate-word" id="popupWord"></div>
@@ -48,4 +88,3 @@
 <script src="/reader.js"></script>
 </body>
 </html>
-

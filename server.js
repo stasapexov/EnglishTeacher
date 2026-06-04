@@ -647,22 +647,37 @@ const wordPairs3 = [
 // ===== BOOKS =====
 const BOOKS = [
     {
+        id: "dialogues",
+        title: "Everyday English Dialogues",
+        author: "English Trainer",
+        level: "A1-A2",
+        levelLabel: "Beginner",
+        pages: "Short dialogues",
+        description: "Простые бытовые диалоги для старта: знакомство, покупки и повседневные фразы.",
+        coverTone: "mint",
+        file: path.join(__dirname, "public/books/dialogues.txt"),
+    },
+    {
         id: "alice",
         title: "Alice's Adventures in Wonderland",
         author: "Lewis Carroll",
+        level: "B1",
+        levelLabel: "Intermediate",
+        pages: "Classic excerpt",
+        description: "Сказочная классика с яркими образами, диалогами и богатой лексикой.",
+        coverTone: "violet",
         file: path.join(__dirname, "public/books/alice.txt"),
     },
     {
         id: "sherlock",
         title: "Robinson Crusoe",
-        author: "Deniel Depho",
+        author: "Daniel Defoe",
+        level: "B2",
+        levelLabel: "Upper-Intermediate",
+        pages: "Adventure excerpt",
+        description: "Приключенческий текст для тренировки длинных предложений и повествовательной лексики.",
+        coverTone: "sunset",
         file: path.join(__dirname, "public/books/sherlock.txt"),
-    },
-    {
-        id: "dialogues",
-        title: "Everyday English Dialogues",
-        author: "English Trainer",
-        file: path.join(__dirname, "public/books/dialogues.txt"),
     },
 ]
 
@@ -707,12 +722,13 @@ app.get("/reader", (req, res) => {
     res.render("reader", { books: BOOKS })
 })
 
+function publicBookData(book) {
+    const { file, ...data } = book
+    return data
+}
+
 app.get("/api/books", (req, res) => {
-    res.json(BOOKS.map(b => ({
-        id: b.id,
-        title: b.title,
-        author: b.author
-    })))
+    res.json(BOOKS.map(publicBookData))
 })
 
 app.get("/api/books/:id", async (req, res) => {
@@ -721,7 +737,7 @@ app.get("/api/books/:id", async (req, res) => {
 
     try {
         const text = fs.readFileSync(book.file, "utf8")
-        res.json({ ...book, text })
+        res.json({ ...publicBookData(book), text })
     } catch {
         res.status(500).json({ error: "book_read_failed" })
     }

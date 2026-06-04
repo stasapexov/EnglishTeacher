@@ -3,6 +3,9 @@ const elSelect = document.getElementById("bookSelect")
 const elStatus = document.getElementById("readerStatus")
 const elTitle = document.getElementById("bookTitle")
 const elAuthor = document.getElementById("bookAuthor")
+const elBookLevel = document.getElementById("bookLevel")
+const elLevelSelect = document.getElementById("levelSelect")
+const elBookGrid = document.getElementById("bookGrid")
 
 const popup = document.getElementById("translatePopup")
 const popupWord = document.getElementById("popupWord")
@@ -85,6 +88,8 @@ async function loadBook(id) {
     currentBookId = id
     elTitle.textContent = data.title
     elAuthor.textContent = data.author
+    elBookLevel.textContent = `${data.level} · ${data.levelLabel}`
+    setActiveBook(id)
     renderText(data.text)
     setStatus("Click a word to translate")
     restoreScroll(id)
@@ -232,7 +237,50 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closePopup()
 })
 
+function setActiveBook(bookId) {
+    document.querySelectorAll(".book-tile").forEach((tile) => {
+        tile.classList.toggle("active", tile.dataset.bookId === bookId)
+    })
+    if (elSelect.value !== bookId) elSelect.value = bookId
+}
+
+function getVisibleBookOptions(level) {
+    return Array.from(elSelect.options).filter((option) => level === "all" || option.dataset.level === level)
+}
+
+function applyLevelFilter() {
+    const selectedLevel = elLevelSelect.value
+    const visibleOptions = getVisibleBookOptions(selectedLevel)
+
+    Array.from(elSelect.options).forEach((option) => {
+        option.hidden = selectedLevel !== "all" && option.dataset.level !== selectedLevel
+    })
+
+    document.querySelectorAll(".book-tile").forEach((tile) => {
+        tile.hidden = selectedLevel !== "all" && tile.dataset.level !== selectedLevel
+    })
+
+    const currentOption = elSelect.selectedOptions[0]
+    if (visibleOptions.length && (selectedLevel !== "all" && currentOption?.dataset.level !== selectedLevel)) {
+        loadBook(visibleOptions[0].value)
+    }
+}
+
 elSelect.addEventListener("change", () => loadBook(elSelect.value))
+
+elLevelSelect.addEventListener("change", () => applyLevelFilter())
+
+elBookGrid.addEventListener("click", (e) => {
+    const tile = e.target.closest(".book-tile")
+    if (!tile) return
+
+    const { bookId, level } = tile.dataset
+    if (elLevelSelect.value !== "all" && elLevelSelect.value !== level) {
+        elLevelSelect.value = level
+        applyLevelFilter()
+    }
+    loadBook(bookId)
+})
 
 // initial load
 loadBook(elSelect.value)
