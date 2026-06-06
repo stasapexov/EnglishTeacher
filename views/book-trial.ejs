@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Book Trial AI</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="trial-shell">
+    <div class="trial-topbar">
+        <a class="reader-home" href="/reader">← Reader</a>
+        <a class="reader-home" href="/">Главная</a>
+    </div>
+
+    <section class="trial-hero">
+        <div>
+            <p class="trial-kicker">🧠 Free AI Book Defense</p>
+            <h1>Book Trial AI</h1>
+            <p>Ответь голосом на вопрос экзаменатора. Сайт превратит речь в текст, отправит ответ в бесплатную AI-модель и покажет процент соответствия содержанию книги.</p>
+        </div>
+        <div class="trial-score-card">
+            <span>Last score</span>
+            <strong id="trialScore">—</strong>
+        </div>
+    </section>
+
+    <section class="trial-grid">
+        <div class="trial-card trial-examiner">
+            <div class="trial-avatar">🎓</div>
+            <div>
+                <label class="reader-label trial-book-label">
+                    Book:
+                    <select id="trialBook" class="reader-select">
+                        <% books.forEach(b => { %>
+                            <option value="<%= b.id %>" <%= selectedBook === b.id ? "selected" : "" %>><%= b.title %> — <%= b.author %></option>
+                        <% }) %>
+                    </select>
+                </label>
+                <h2 id="trialQuestion">What was this book about? Answer in English.</h2>
+                <p class="trial-hint">Это типичный вопрос на устной защите книги: оценивается не дословный перевод, а понимание сюжета.</p>
+            </div>
+        </div>
+
+        <div class="trial-card">
+            <h2>🎙️ Your answer</h2>
+            <textarea id="trialAnswer" class="trial-textarea" placeholder="Speak or type your answer in English..."></textarea>
+            <div class="trial-actions">
+                <button id="trialSpeak" class="translate-btn" type="button">🎙️ Answer by voice</button>
+                <button id="trialEvaluate" class="translate-btn trial-primary" type="button">⚖️ Evaluate with AI</button>
+            </div>
+            <p id="trialStatus" class="trial-status">Выбери книгу и ответь на английском.</p>
+        </div>
+    </section>
+
+    <section id="trialResult" class="trial-card trial-result" hidden>
+        <div class="trial-result-head">
+            <div>
+                <p class="trial-kicker">AI report</p>
+                <h2>Book understanding result</h2>
+            </div>
+            <div class="trial-percent" id="resultPercent">0%</div>
+        </div>
+        <div class="trial-bars">
+            <div><span>Content match</span><div class="trial-bar"><i id="barContent"></i></div><b id="contentScore">0%</b></div>
+            <div><span>English quality</span><div class="trial-bar"><i id="barEnglish"></i></div><b id="englishScore">0%</b></div>
+        </div>
+        <div class="trial-columns">
+            <div>
+                <h3>✅ Strong points</h3>
+                <ul id="strongPoints"></ul>
+            </div>
+            <div>
+                <h3>📌 What to add</h3>
+                <ul id="missedPoints"></ul>
+            </div>
+            <div>
+                <h3>⚠️ Possible wrong claims</h3>
+                <ul id="wrongClaims"></ul>
+            </div>
+        </div>
+        <div class="trial-feedback">
+            <h3>Feedback</h3>
+            <p id="feedbackRu"></p>
+            <h3>Corrected answer</h3>
+            <p id="correctedAnswer"></p>
+            <small id="providerInfo"></small>
+        </div>
+    </section>
+</div>
+<script src="/account.js"></script>
+<script src="/book-trial.js"></script>
+</body>
+</html>
