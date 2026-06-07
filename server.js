@@ -123,7 +123,8 @@ function defaultProgress() {
             reader: { completed: 0, xp: 0 },
             review: { completed: 0, xp: 0 },
             grammar: { completed: 0, xp: 0 },
-            pronunciation: { completed: 0, xp: 0 }
+            pronunciation: { completed: 0, xp: 0 },
+            bookTrial: { completed: 0, xp: 0 }
         },
         reading: {}
     }
@@ -666,6 +667,152 @@ const BOOKS = [
     },
 ]
 
+const BOOK_TRIAL_SUMMARIES = {
+    alice: {
+        keyPoints: [
+            "Alice follows the White Rabbit and falls down a rabbit hole.",
+            "She enters Wonderland, a strange dream-like world with unusual rules.",
+            "Alice changes size, meets the Caterpillar, the Cheshire Cat, the Mad Hatter, the March Hare and the Queen of Hearts.",
+            "The story is about curiosity, imagination, absurd situations and Alice trying to understand Wonderland."
+        ],
+        summary: "Alice's Adventures in Wonderland is about a curious girl named Alice who follows the White Rabbit, falls down a rabbit hole and enters Wonderland. In this strange world she changes size, meets unusual characters such as the Caterpillar, the Cheshire Cat, the Mad Hatter and the Queen of Hearts, and experiences absurd dream-like adventures before waking up."
+    },
+    sherlock: {
+        keyPoints: [
+            "Robinson Crusoe goes to sea and becomes shipwrecked on a remote island.",
+            "He survives alone by building shelter, finding food, making tools and learning to adapt.",
+            "He later meets Friday and teaches him while they face danger together.",
+            "The story is about survival, independence, faith, hard work and human resilience."
+        ],
+        summary: "Robinson Crusoe is about a sailor who is shipwrecked and forced to live for many years on a remote island. He builds a shelter, grows food, makes tools, keeps a journal, reflects on his life and learns to survive. Later he meets Friday and their relationship becomes an important part of the story. The book focuses on survival, patience, faith and independence."
+    },
+    dialogues: {
+        keyPoints: [
+            "The book contains everyday English conversations for real-life situations.",
+            "The dialogues show how people greet each other, ask questions, make plans and solve simple problems.",
+            "It helps learners practice practical spoken English, polite phrases and useful vocabulary.",
+            "The main purpose is communication practice rather than one continuous plot."
+        ],
+        summary: "Everyday English Dialogues is a training book made of short conversations from daily life. It is about practical communication: greetings, questions, plans, shopping, school, travel and other common situations. The goal is to help learners understand natural phrases and speak English more confidently in real situations."
+    }
+}
+
+function cleanJsonText(text) {
+    return String(text || "")
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/```$/i, "")
+        .trim()
+}
+
+function parseAiJson(text) {
+    const cleaned = cleanJsonText(text)
+    try {
+        return JSON.parse(cleaned)
+    } catch {
+        const match = cleaned.match(/\{[\s\S]*\}/)
+        if (!match) throw new Error("AI response did not contain JSON")
+        return JSON.parse(match[0])
+    }
+}
+
+function normalizeScore(value, fallback = 0) {
+    const score = Number(value)
+    if (!Number.isFinite(score)) return fallback
+    return Math.max(0, Math.min(100, Math.round(score)))
+}
+
+function normalizeTrialResult(result, provider, fallbackReason = "") {
+    const matchPercent = normalizeScore(result.matchPercent, 0)
+    return {
+        matchPercent,
+        contentScore: normalizeScore(result.contentScore, matchPercent),
+        englishScore: normalizeScore(result.englishScore, 50),
+        level: String(result.level || "A2"),
+        isMostlyCorrect: Boolean(result.isMostlyCorrect),
+        missedKeyPoints: Array.isArray(result.missedKeyPoints) ? result.missedKeyPoints.slice(0, 5) : [],
+        wrongClaims: Array.isArray(result.wrongClaims) ? result.wrongClaims.slice(0, 5) : [],
+        strongPoints: Array.isArray(result.strongPoints) ? result.strongPoints.slice(0, 5) : [],
+        feedbackRu: String(result.feedbackRu || "Ответ проверен. Попробуй добавить больше конкретных событий из книги."),
+        correctedAnswerEn: String(result.correctedAnswerEn || ""),
+        provider,
+        fallbackReason
+    }
+}
+
+function keywordFallbackEvaluation(book, userAnswer, fallbackReason = "") {
+    const summary = BOOK_TRIAL_SUMMARIES[book.id] || BOOK_TRIAL_SUMMARIES.dialogues
+    const answer = String(userAnswer || "").toLowerCase()
+    const words = answer.match(/[a-z]+(?:'[a-z]+)?/g) || []
+    const uniqueWords = new Set(words)
+    const importantWords = summary.summary.toLowerCase().match(/[a-z]{4,}/g) || []
+    const uniqueImportant = [...new Set(importantWords)]
+    const matchedWords = uniqueImportant.filter(word => uniqueWords.has(word))
+    const lengthScore = Math.min(30, Math.floor(words.length * 1.5))
+    const keywordScore = Math.min(55, Math.round((matchedWords.length / Math.max(8, uniqueImportant.length * 0.35)) * 55))
+    const englishScore = Math.min(100, 35 + lengthScore + Math.min(25, matchedWords.length * 3))
+    const matchPercent = Math.min(100, Math.max(10, keywordScore + lengthScore + (words.length > 18 ? 15 : 0)))
+
+    return normalizeTrialResult({
+        matchPercent,
+        contentScore: matchPercent,
+        englishScore,
+        level: words.length > 45 ? "B2" : words.length > 25 ? "B1" : "A2",
+        isMostlyCorrect: matchPercent >= 60,
+        strongPoints: matchedWords.slice(0, 4).map(word => `You mentioned or implied: ${word}.`),
+        missedKeyPoints: summary.keyPoints.filter(point => !point.toLowerCase().split(/\W+/).some(word => word.length > 5 && uniqueWords.has(word))).slice(0, 3),
+        wrongClaims: [],
+        feedbackRu: "Бесплатная AI-модель сейчас недоступна, поэтому включилась локальная смысловая проверка по ключевым событиям книги. Для более высокого процента добавь главного героя, место действия и 2–3 важных события.",
+        correctedAnswerEn: summary.summary
+    }, "local-free-fallback", fallbackReason)
+}
+
+function buildBookTrialPrompt(book, question, userAnswer) {
+    const summary = BOOK_TRIAL_SUMMARIES[book.id] || BOOK_TRIAL_SUMMARIES.dialogues
+    return `You are an English literature exam evaluator. Evaluate how well the student's answer matches the book content. Do not require exact wording; evaluate meaning. Return only valid JSON and no markdown.
+
+Book title: ${book.title}
+Author: ${book.author}
+Reference summary: ${summary.summary}
+Key points:
+- ${summary.keyPoints.join("\n- ")}
+
+Exam question: ${question}
+Student answer: ${userAnswer}
+
+JSON schema:
+{
+  "matchPercent": number from 0 to 100,
+  "contentScore": number from 0 to 100,
+  "englishScore": number from 0 to 100,
+  "level": "A1" | "A2" | "B1" | "B2" | "C1",
+  "isMostlyCorrect": boolean,
+  "missedKeyPoints": string[],
+  "wrongClaims": string[],
+  "strongPoints": string[],
+  "feedbackRu": string,
+  "correctedAnswerEn": string
+}`
+}
+
+async function evaluateWithPollinations(book, question, userAnswer) {
+    const prompt = buildBookTrialPrompt(book, question, userAnswer)
+    const params = {
+        json: "true",
+        model: process.env.POLLINATIONS_MODEL || "openai"
+    }
+    if (process.env.POLLINATIONS_API_KEY) params.key = process.env.POLLINATIONS_API_KEY
+
+    const response = await axios.get(`https://gen.pollinations.ai/text/${encodeURIComponent(prompt)}`, {
+        params,
+        timeout: 25000,
+        headers: { "User-Agent": "EnglishTeacher-BookTrial/1.0" },
+        responseType: "text",
+        transformResponse: [data => data]
+    })
+    return normalizeTrialResult(parseAiJson(response.data), "pollinations-free-ai")
+}
+
 // ===== ROUTES =====
 
 app.get("/", (req, res) => {
@@ -705,6 +852,35 @@ app.get("/leaderboard", (req, res) => {
 
 app.get("/reader", (req, res) => {
     res.render("reader", { books: BOOKS })
+})
+
+app.get("/book-trial", (req, res) => {
+    const selectedBook = BOOKS.some(book => book.id === req.query.book) ? req.query.book : BOOKS[0].id
+    res.render("book-trial", { books: BOOKS, selectedBook })
+})
+
+app.post("/api/book-trial/evaluate", async (req, res) => {
+    const bookId = String(req.body.bookId || "").trim()
+    const question = String(req.body.question || "What was this book about? Answer in English.").trim().slice(0, 240)
+    const userAnswer = String(req.body.userAnswer || "").trim().slice(0, 1400)
+    const book = BOOKS.find(item => item.id === bookId)
+
+    if (!book) return res.status(404).json({ error: "book_not_found", message: "Книга не найдена" })
+    if (userAnswer.length < 8) return res.status(400).json({ error: "answer_too_short", message: "Ответ слишком короткий" })
+
+    try {
+        const result = await evaluateWithPollinations(book, question, userAnswer)
+        const ctx = authContext(req)
+        if (ctx.user) {
+            awardXp(ctx.user, "bookTrial", Math.max(5, Math.round(result.matchPercent / 10)))
+            saveUsers(ctx.users)
+        }
+        return res.json(result)
+    } catch (error) {
+        console.log("Pollinations Book Trial Error:", error.response?.status || error.message)
+        const fallback = keywordFallbackEvaluation(book, userAnswer, "Free AI provider unavailable; used local semantic fallback.")
+        return res.json(fallback)
+    }
 })
 
 app.get("/api/books", (req, res) => {

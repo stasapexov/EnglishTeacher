@@ -3,6 +3,7 @@ const elSelect = document.getElementById("bookSelect")
 const elStatus = document.getElementById("readerStatus")
 const elTitle = document.getElementById("bookTitle")
 const elAuthor = document.getElementById("bookAuthor")
+const elStartBookTrial = document.getElementById("startBookTrial")
 
 const popup = document.getElementById("translatePopup")
 const popupWord = document.getElementById("popupWord")
@@ -83,6 +84,7 @@ async function loadBook(id) {
     }
     const data = await r.json()
     currentBookId = id
+    if (elStartBookTrial) elStartBookTrial.href = `/book-trial?book=${encodeURIComponent(id)}`
     elTitle.textContent = data.title
     elAuthor.textContent = data.author
     renderText(data.text)
