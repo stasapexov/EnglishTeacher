@@ -17,7 +17,7 @@ const feedbackRu = document.getElementById("feedbackRu")
 const correctedAnswer = document.getElementById("correctedAnswer")
 const providerInfo = document.getElementById("providerInfo")
 
-const question = "What was this book about? Answer in English."
+const question = "О чём эта книга? Ответь по-русски."
 
 function setStatus(text) {
     trialStatus.textContent = text
@@ -54,12 +54,12 @@ function renderResult(data) {
     setBar(barContent, content)
     setBar(barEnglish, english)
 
-    renderList(strongPoints, data.strongPoints, "Answer submitted and checked.")
-    renderList(missedPoints, data.missedKeyPoints, "No major missing points found.")
-    renderList(wrongClaims, data.wrongClaims, "No obvious wrong facts found.")
+    renderList(strongPoints, data.strongPoints, "Ответ отправлен и проверен.")
+    renderList(missedPoints, data.missedKeyPoints, "Главные пункты не пропущены.")
+    renderList(wrongClaims, data.wrongClaims, "Явных фактических ошибок не найдено.")
 
     feedbackRu.textContent = data.feedbackRu || "Ответ проверен. Попробуй сделать пересказ подробнее."
-    correctedAnswer.textContent = data.correctedAnswerEn || trialAnswer.value.trim()
+    correctedAnswer.textContent = data.correctedAnswerRu || data.correctedAnswerEn || trialAnswer.value.trim()
     providerInfo.textContent = `Provider: ${data.provider || "unknown"}${data.fallbackReason ? ` · ${data.fallbackReason}` : ""}`
     trialResult.scrollIntoView({ behavior: "smooth", block: "start" })
 }
@@ -72,16 +72,16 @@ function startVoiceAnswer() {
     }
 
     const recognition = new SpeechRecognition()
-    recognition.lang = "en-US"
+    recognition.lang = "ru-RU"
     recognition.interimResults = false
     recognition.maxAlternatives = 1
 
-    recognition.onstart = () => setStatus("Listening... Speak in English.")
+    recognition.onstart = () => setStatus("Слушаю... Говори по-русски.")
     recognition.onerror = () => setStatus("Не удалось распознать речь. Попробуйте ещё раз или напечатайте ответ.")
     recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript
         trialAnswer.value = transcript
-        setStatus("Речь распознана. Теперь можно отправить ответ на AI-проверку.")
+        setStatus("Речь распознана. Теперь можно отправить русский ответ на AI-проверку.")
     }
     recognition.onend = () => {
         if (!trialAnswer.value.trim()) setStatus("Запись остановлена. Ответ не распознан.")
@@ -93,12 +93,12 @@ function startVoiceAnswer() {
 async function evaluateAnswer() {
     const userAnswer = trialAnswer.value.trim()
     if (userAnswer.length < 8) {
-        setStatus("Ответ слишком короткий. Скажи хотя бы 1–2 предложения о книге.")
+        setStatus("Ответ слишком короткий. Скажи хотя бы 1–2 предложения о книге на русском.")
         return
     }
 
     trialEvaluate.disabled = true
-    setStatus("AI проверяет, насколько пересказ соответствует книге...")
+    setStatus("AI проверяет, насколько русский пересказ соответствует книге...")
 
     try {
         const headers = { "Content-Type": "application/json" }

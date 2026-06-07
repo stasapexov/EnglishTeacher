@@ -17,7 +17,7 @@
         <div>
             <p class="trial-kicker">🧠 Free AI Book Defense</p>
             <h1>Book Trial AI</h1>
-            <p>Ответь голосом на вопрос экзаменатора. Сайт превратит речь в текст, отправит ответ в бесплатную AI-модель и покажет процент соответствия содержанию книги.</p>
+            <p>Ответь по-русски на вопрос экзаменатора о содержании книги. Сайт превратит речь в текст, отправит ответ в бесплатную AI-модель и покажет процент соответствия сюжету.</p>
         </div>
         <div class="trial-score-card">
             <span>Last score</span>
@@ -37,19 +37,19 @@
                         <% }) %>
                     </select>
                 </label>
-                <h2 id="trialQuestion">What was this book about? Answer in English.</h2>
-                <p class="trial-hint">Это типичный вопрос на устной защите книги: оценивается не дословный перевод, а понимание сюжета.</p>
+                <h2 id="trialQuestion">О чём эта книга? Ответь по-русски.</h2>
+                <p class="trial-hint">Это типичный вопрос на устной защите книги: оценивается не английская грамматика, а понимание сюжета и важных деталей.</p>
             </div>
         </div>
 
         <div class="trial-card">
-            <h2>🎙️ Your answer</h2>
-            <textarea id="trialAnswer" class="trial-textarea" placeholder="Speak or type your answer in English..."></textarea>
+            <h2>🎙️ Твой ответ</h2>
+            <textarea id="trialAnswer" class="trial-textarea" placeholder="Скажи или напечатай ответ по-русски..."></textarea>
             <div class="trial-actions">
                 <button id="trialSpeak" class="translate-btn" type="button">🎙️ Answer by voice</button>
                 <button id="trialEvaluate" class="translate-btn trial-primary" type="button">⚖️ Evaluate with AI</button>
             </div>
-            <p id="trialStatus" class="trial-status">Выбери книгу и ответь на английском.</p>
+            <p id="trialStatus" class="trial-status">Выбери книгу и ответь на русском.</p>
         </div>
     </section>
 
@@ -57,13 +57,13 @@
         <div class="trial-result-head">
             <div>
                 <p class="trial-kicker">AI report</p>
-                <h2>Book understanding result</h2>
+                <h2>Результат понимания книги</h2>
             </div>
             <div class="trial-percent" id="resultPercent">0%</div>
         </div>
         <div class="trial-bars">
             <div><span>Content match</span><div class="trial-bar"><i id="barContent"></i></div><b id="contentScore">0%</b></div>
-            <div><span>English quality</span><div class="trial-bar"><i id="barEnglish"></i></div><b id="englishScore">0%</b></div>
+            <div><span>Russian answer clarity</span><div class="trial-bar"><i id="barEnglish"></i></div><b id="englishScore">0%</b></div>
         </div>
         <div class="trial-columns">
             <div>
@@ -82,7 +82,7 @@
         <div class="trial-feedback">
             <h3>Feedback</h3>
             <p id="feedbackRu"></p>
-            <h3>Corrected answer</h3>
+            <h3>Пример ответа на русском</h3>
             <p id="correctedAnswer"></p>
             <small id="providerInfo"></small>
         </div>
