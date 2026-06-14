@@ -675,7 +675,30 @@ const BOOK_TRIAL_SUMMARIES = {
             "Alice changes size, meets the Caterpillar, the Cheshire Cat, the Mad Hatter, the March Hare and the Queen of Hearts.",
             "The story is about curiosity, imagination, absurd situations and Alice trying to understand Wonderland."
         ],
-        summary: "Alice's Adventures in Wonderland is about a curious girl named Alice who follows the White Rabbit, falls down a rabbit hole and enters Wonderland. In this strange world she changes size, meets unusual characters such as the Caterpillar, the Cheshire Cat, the Mad Hatter and the Queen of Hearts, and experiences absurd dream-like adventures before waking up."
+        summary: "Alice's Adventures in Wonderland is about a curious girl named Alice who follows the White Rabbit, falls down a rabbit hole and enters Wonderland. In this strange world she changes size, meets unusual characters such as the Caterpillar, the Cheshire Cat, the Mad Hatter and the Queen of Hearts, and experiences absurd dream-like adventures before waking up.",
+        summaryRu: "«Алиса в Стране чудес» рассказывает о любопытной девочке Алисе, которая следует за Белым Кроликом, падает в кроличью нору и попадает в Страну чудес. Там она меняет рост, встречает необычных персонажей — Гусеницу, Чеширского Кота, Шляпника и Королеву Червей — переживает странные, похожие на сон приключения и в конце просыпается.",
+        quiz: [
+            {
+                question: "Who does Alice follow at the beginning of the story?",
+                options: ["The White Rabbit", "The Queen of Hearts", "The Cheshire Cat", "The Mad Hatter"],
+                answer: 0
+            },
+            {
+                question: "Where does Alice go after falling down the rabbit hole?",
+                options: ["Wonderland", "London", "A desert island", "A school"],
+                answer: 0
+            },
+            {
+                question: "Which character is famous for disappearing and leaving only a grin?",
+                options: ["The Cheshire Cat", "The Caterpillar", "The March Hare", "The King of Hearts"],
+                answer: 0
+            },
+            {
+                question: "What is one main idea of the book?",
+                options: ["Curiosity and imagination", "Space travel", "A detective investigation", "A war between kingdoms"],
+                answer: 0
+            }
+        ]
     },
     sherlock: {
         keyPoints: [
@@ -684,7 +707,30 @@ const BOOK_TRIAL_SUMMARIES = {
             "He later meets Friday and teaches him while they face danger together.",
             "The story is about survival, independence, faith, hard work and human resilience."
         ],
-        summary: "Robinson Crusoe is about a sailor who is shipwrecked and forced to live for many years on a remote island. He builds a shelter, grows food, makes tools, keeps a journal, reflects on his life and learns to survive. Later he meets Friday and their relationship becomes an important part of the story. The book focuses on survival, patience, faith and independence."
+        summary: "Robinson Crusoe is about a sailor who is shipwrecked and forced to live for many years on a remote island. He builds a shelter, grows food, makes tools, keeps a journal, reflects on his life and learns to survive. Later he meets Friday and their relationship becomes an important part of the story. The book focuses on survival, patience, faith and independence.",
+        summaryRu: "«Робинзон Крузо» рассказывает о моряке, который после кораблекрушения много лет живёт на далёком острове. Он строит жильё, добывает еду, делает инструменты, ведёт дневник, размышляет о жизни и учится выживать. Позже он встречает Пятницу, и их отношения становятся важной частью истории. Главные темы книги — выживание, терпение, вера и самостоятельность.",
+        quiz: [
+            {
+                question: "What happens to Robinson Crusoe?",
+                options: ["He is shipwrecked on an island", "He becomes a king", "He opens a school", "He travels to Wonderland"],
+                answer: 0
+            },
+            {
+                question: "What does Crusoe do to survive?",
+                options: ["He builds shelter and finds food", "He solves crimes in London", "He studies magic", "He wins a race"],
+                answer: 0
+            },
+            {
+                question: "Who does Robinson Crusoe meet later in the story?",
+                options: ["Friday", "The White Rabbit", "Sherlock Holmes", "The Queen of Hearts"],
+                answer: 0
+            },
+            {
+                question: "Which theme is important in the book?",
+                options: ["Survival and independence", "Dreams and nonsense", "Shopping phrases", "City traffic"],
+                answer: 0
+            }
+        ]
     },
     dialogues: {
         keyPoints: [
@@ -693,7 +739,30 @@ const BOOK_TRIAL_SUMMARIES = {
             "It helps learners practice practical spoken English, polite phrases and useful vocabulary.",
             "The main purpose is communication practice rather than one continuous plot."
         ],
-        summary: "Everyday English Dialogues is a training book made of short conversations from daily life. It is about practical communication: greetings, questions, plans, shopping, school, travel and other common situations. The goal is to help learners understand natural phrases and speak English more confidently in real situations."
+        summary: "Everyday English Dialogues is a training book made of short conversations from daily life. It is about practical communication: greetings, questions, plans, shopping, school, travel and other common situations. The goal is to help learners understand natural phrases and speak English more confidently in real situations.",
+        summaryRu: "«Everyday English Dialogues» — это учебная книга с короткими диалогами из повседневной жизни. Она посвящена практическому общению: приветствиям, вопросам, планам, покупкам, школе, путешествиям и другим обычным ситуациям. Цель книги — помочь ученикам понимать естественные фразы и увереннее говорить по-английски в реальной жизни.",
+        quiz: [
+            {
+                question: "What is this book mainly made of?",
+                options: ["Short everyday dialogues", "One long adventure story", "Scientific articles", "Poems about nature"],
+                answer: 0
+            },
+            {
+                question: "Which situation can the dialogues help with?",
+                options: ["Greeting people and asking questions", "Repairing a spaceship", "Fighting dragons", "Solving a murder"],
+                answer: 0
+            },
+            {
+                question: "What is the main goal of the book?",
+                options: ["To practice practical spoken English", "To teach advanced physics", "To explain ancient history", "To train professional athletes"],
+                answer: 0
+            },
+            {
+                question: "Does the book have one continuous plot?",
+                options: ["No, it has separate conversations", "Yes, it is a detective novel", "Yes, it is a fantasy quest", "No, it is only a dictionary"],
+                answer: 0
+            }
+        ]
     }
 }
 
@@ -735,6 +804,7 @@ function normalizeTrialResult(result, provider, fallbackReason = "") {
         strongPoints: Array.isArray(result.strongPoints) ? result.strongPoints.slice(0, 5) : [],
         feedbackRu: String(result.feedbackRu || "Ответ проверен. Попробуй добавить больше конкретных событий из книги."),
         correctedAnswerEn: String(result.correctedAnswerEn || ""),
+        correctedAnswerRu: String(result.correctedAnswerRu || result.modelAnswerRu || ""),
         provider,
         fallbackReason
     }
@@ -743,15 +813,17 @@ function normalizeTrialResult(result, provider, fallbackReason = "") {
 function keywordFallbackEvaluation(book, userAnswer, fallbackReason = "") {
     const summary = BOOK_TRIAL_SUMMARIES[book.id] || BOOK_TRIAL_SUMMARIES.dialogues
     const answer = String(userAnswer || "").toLowerCase()
-    const words = answer.match(/[a-z]+(?:'[a-z]+)?/g) || []
+    const words = answer.match(/[a-zа-яё]+(?:'[a-z]+)?/giu) || []
     const uniqueWords = new Set(words)
-    const importantWords = summary.summary.toLowerCase().match(/[a-z]{4,}/g) || []
+    const importantWords = `${summary.summary} ${summary.summaryRu}`.toLowerCase().match(/[a-zа-яё]{4,}/giu) || []
     const uniqueImportant = [...new Set(importantWords)]
     const matchedWords = uniqueImportant.filter(word => uniqueWords.has(word))
     const lengthScore = Math.min(30, Math.floor(words.length * 1.5))
-    const keywordScore = Math.min(55, Math.round((matchedWords.length / Math.max(8, uniqueImportant.length * 0.35)) * 55))
-    const englishScore = Math.min(100, 35 + lengthScore + Math.min(25, matchedWords.length * 3))
+    const keywordScore = Math.min(55, Math.round((matchedWords.length / Math.max(8, uniqueImportant.length * 0.25)) * 55))
+    const languageScore = /[а-яё]/i.test(answer) ? 100 : 55
+    const englishScore = Math.min(100, Math.max(45, languageScore - (words.length < 8 ? 20 : 0)))
     const matchPercent = Math.min(100, Math.max(10, keywordScore + lengthScore + (words.length > 18 ? 15 : 0)))
+    const translatedKeyPoints = (summary.summaryRu.match(/[^.!?]+[.!?]+/g) || [summary.summaryRu]).map(point => point.trim())
 
     return normalizeTrialResult({
         matchPercent,
@@ -759,26 +831,33 @@ function keywordFallbackEvaluation(book, userAnswer, fallbackReason = "") {
         englishScore,
         level: words.length > 45 ? "B2" : words.length > 25 ? "B1" : "A2",
         isMostlyCorrect: matchPercent >= 60,
-        strongPoints: matchedWords.slice(0, 4).map(word => `You mentioned or implied: ${word}.`),
-        missedKeyPoints: summary.keyPoints.filter(point => !point.toLowerCase().split(/\W+/).some(word => word.length > 5 && uniqueWords.has(word))).slice(0, 3),
+        strongPoints: matchedWords.slice(0, 4).map(word => `Ты упомянул(а) важную деталь: ${word}.`),
+        missedKeyPoints: translatedKeyPoints.filter(point => !point.toLowerCase().split(/[^a-zа-яё]+/iu).some(word => word.length > 5 && uniqueWords.has(word))).slice(0, 3),
         wrongClaims: [],
-        feedbackRu: "Бесплатная AI-модель сейчас недоступна, поэтому включилась локальная смысловая проверка по ключевым событиям книги. Для более высокого процента добавь главного героя, место действия и 2–3 важных события.",
-        correctedAnswerEn: summary.summary
+        feedbackRu: "Бесплатная AI-модель сейчас недоступна, поэтому включилась локальная смысловая проверка по ключевым событиям книги. Для более высокого процента добавь главного героя, место действия и 2–3 важных события на русском.",
+        correctedAnswerEn: summary.summary,
+        correctedAnswerRu: summary.summaryRu
     }, "local-free-fallback", fallbackReason)
 }
 
 function buildBookTrialPrompt(book, question, userAnswer) {
     const summary = BOOK_TRIAL_SUMMARIES[book.id] || BOOK_TRIAL_SUMMARIES.dialogues
-    return `You are an English literature exam evaluator. Evaluate how well the student's answer matches the book content. Do not require exact wording; evaluate meaning. Return only valid JSON and no markdown.
+    return `You are a bilingual literature exam evaluator. The student answers the book-content question in Russian. Evaluate how well the Russian answer matches the book content; do not require exact wording and judge meaning. Return only valid JSON and no markdown.
 
 Book title: ${book.title}
 Author: ${book.author}
-Reference summary: ${summary.summary}
+Reference summary in English: ${summary.summary}
+Reference summary in Russian: ${summary.summaryRu}
 Key points:
 - ${summary.keyPoints.join("\n- ")}
 
 Exam question: ${question}
-Student answer: ${userAnswer}
+Student answer in Russian: ${userAnswer}
+
+Scoring rules:
+- matchPercent/contentScore: content accuracy and completeness only.
+- englishScore: do not grade the Russian answer as English writing; use 100 when the answer is clearly Russian and understandable, lower only if it is too short or unreadable.
+- feedbackRu, missedKeyPoints, wrongClaims, strongPoints and correctedAnswerRu must be written in Russian.
 
 JSON schema:
 {
@@ -791,7 +870,8 @@ JSON schema:
   "wrongClaims": string[],
   "strongPoints": string[],
   "feedbackRu": string,
-  "correctedAnswerEn": string
+  "correctedAnswerEn": string,
+  "correctedAnswerRu": string
 }`
 }
 
@@ -861,7 +941,7 @@ app.get("/book-trial", (req, res) => {
 
 app.post("/api/book-trial/evaluate", async (req, res) => {
     const bookId = String(req.body.bookId || "").trim()
-    const question = String(req.body.question || "What was this book about? Answer in English.").trim().slice(0, 240)
+    const question = String(req.body.question || "О чём эта книга? Ответь по-русски.").trim().slice(0, 240)
     const userAnswer = String(req.body.userAnswer || "").trim().slice(0, 1400)
     const book = BOOKS.find(item => item.id === bookId)
 
@@ -887,7 +967,8 @@ app.get("/api/books", (req, res) => {
     res.json(BOOKS.map(b => ({
         id: b.id,
         title: b.title,
-        author: b.author
+        author: b.author,
+        quiz: (BOOK_TRIAL_SUMMARIES[b.id]?.quiz || [])
     })))
 })
 
@@ -897,7 +978,7 @@ app.get("/api/books/:id", async (req, res) => {
 
     try {
         const text = fs.readFileSync(book.file, "utf8")
-        res.json({ ...book, text })
+        res.json({ ...book, text, quiz: (BOOK_TRIAL_SUMMARIES[book.id]?.quiz || []) })
     } catch {
         res.status(500).json({ error: "book_read_failed" })
     }

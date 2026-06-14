@@ -651,3 +651,56 @@ home{
         grid-template-columns: 1fr;
     }
 }
+
+/* End-of-book quiz */
+.book-quiz{
+    margin-top: 18px;
+}
+
+.book-quiz h2{
+    margin: 8px 0 6px;
+    color:#0f172a;
+}
+
+.book-quiz-intro{
+    color:#64748b;
+    line-height:1.55;
+}
+
+.book-quiz-question{
+    border:1px solid #dbeafe;
+    border-radius:18px;
+    padding:16px;
+    margin:14px 0;
+    background:#f8fafc;
+}
+
+.book-quiz-question legend{
+    font-weight:900;
+    color:#1e293b;
+    padding:0 8px;
+}
+
+.book-quiz-option{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:10px 0;
+    cursor:pointer;
+    color:#0f172a;
+}
+
+.book-quiz-option input{
+    width:18px;
+    height:18px;
+}
+
+.book-quiz-question.correct{
+    border-color:#22c55e;
+    background:#f0fdf4;
+}
+
+.book-quiz-question.wrong{
+    border-color:#f97316;
+    background:#fff7ed;
+}

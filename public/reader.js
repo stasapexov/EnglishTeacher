@@ -4,6 +4,10 @@ const elStatus = document.getElementById("readerStatus")
 const elTitle = document.getElementById("bookTitle")
 const elAuthor = document.getElementById("bookAuthor")
 const elStartBookTrial = document.getElementById("startBookTrial")
+const elBookQuiz = document.getElementById("bookQuiz")
+const elBookQuizQuestions = document.getElementById("bookQuizQuestions")
+const elBookQuizCheck = document.getElementById("bookQuizCheck")
+const elBookQuizResult = document.getElementById("bookQuizResult")
 
 const popup = document.getElementById("translatePopup")
 const popupWord = document.getElementById("popupWord")
@@ -19,6 +23,7 @@ let currentWord = ""
 let currentTranslation = ""
 let currentBookId = elSelect.value
 let progressTimer = null
+let currentQuiz = []
 
 function getReaderToken() {
     return localStorage.getItem("englishTrainer_token") || ""
@@ -72,6 +77,56 @@ function renderText(text) {
         .join("")
     elText.innerHTML = html
 }
+
+function rotatedOptions(options, offset) {
+    if (!options.length) return []
+    return options.map((text, originalIndex) => ({ text, originalIndex }))
+        .slice(offset)
+        .concat(options.map((text, originalIndex) => ({ text, originalIndex })).slice(0, offset))
+}
+
+function renderBookQuiz(quiz) {
+    currentQuiz = Array.isArray(quiz) ? quiz : []
+    if (!elBookQuiz || !elBookQuizQuestions || !currentQuiz.length) {
+        if (elBookQuiz) elBookQuiz.hidden = true
+        return
+    }
+
+    elBookQuiz.hidden = false
+    elBookQuizResult.textContent = ""
+    elBookQuizQuestions.innerHTML = currentQuiz.map((item, questionIndex) => {
+        const options = Array.isArray(item.options) ? item.options : []
+        const displayOptions = rotatedOptions(options, questionIndex % Math.max(1, options.length))
+        const answers = displayOptions.map(option => `
+            <label class="book-quiz-option">
+                <input type="radio" name="bookQuiz${questionIndex}" value="${option.originalIndex}">
+                <span>${escapeHtml(String(option.text))}</span>
+            </label>
+        `).join("")
+        return `
+            <fieldset class="book-quiz-question">
+                <legend>${questionIndex + 1}. ${escapeHtml(String(item.question || "Question"))}</legend>
+                ${answers}
+            </fieldset>
+        `
+    }).join("")
+}
+
+function checkBookQuiz() {
+    if (!currentQuiz.length) return
+    let score = 0
+    currentQuiz.forEach((item, questionIndex) => {
+        const selected = elBookQuizQuestions.querySelector(`input[name="bookQuiz${questionIndex}"]:checked`)
+        const question = elBookQuizQuestions.querySelectorAll(".book-quiz-question")[questionIndex]
+        const isCorrect = selected && Number(selected.value) === Number(item.answer)
+        if (isCorrect) score += 1
+        if (question) {
+            question.classList.toggle("correct", Boolean(isCorrect))
+            question.classList.toggle("wrong", Boolean(selected && !isCorrect))
+        }
+    })
+    elBookQuizResult.textContent = `Your score: ${score}/${currentQuiz.length}`
+}
 async function loadBook(id) {
     setStatus("Loading…")
     elText.innerHTML = ""
@@ -88,6 +143,7 @@ async function loadBook(id) {
     elTitle.textContent = data.title
     elAuthor.textContent = data.author
     renderText(data.text)
+    renderBookQuiz(data.quiz)
     setStatus("Click a word to translate")
     restoreScroll(id)
 }
@@ -165,6 +221,8 @@ elText.addEventListener("click", async (e) => {
         popupResult.textContent = String(err?.message || err || "Translate failed")
     }
 })
+
+if (elBookQuizCheck) elBookQuizCheck.addEventListener("click", checkBookQuiz)
 
 popupClose.addEventListener("click", () => closePopup())
 popupSpeak.addEventListener("click", () => {

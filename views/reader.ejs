@@ -35,6 +35,15 @@
         <div id="readerText" class="reader-text" aria-label="Book text"></div>
     </div>
 
+    <section id="bookQuiz" class="reader-card book-quiz" hidden>
+        <p class="trial-kicker">End-of-book test</p>
+        <h2>English comprehension test</h2>
+        <p class="book-quiz-intro">Answer these questions in English after you finish the book.</p>
+        <div id="bookQuizQuestions"></div>
+        <button id="bookQuizCheck" class="translate-btn trial-primary" type="button">Check test</button>
+        <p id="bookQuizResult" class="trial-status"></p>
+    </section>
+
     <div id="translatePopup" class="translate-popup" role="dialog" aria-hidden="true">
         <div class="translate-word" id="popupWord"></div>
         <div class="translate-result" id="popupResult"></div>
